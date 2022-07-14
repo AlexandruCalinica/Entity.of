@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.html",
   "scripts": {
-    "test:unit": "jest",
-    "build": "parcel build index.html"
+    "build": "npx swc src -d dist",
+    "bundle": "npx spack",
+    "test:unit": "jest"
   },
   "dependencies": {
     "lodash": "4.17.21"

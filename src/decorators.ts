@@ -25,10 +25,6 @@ export function Model<T extends { new (...args: any[]): {} }>(constructor: T) {
       constructor as any,
       "of"
     );
-
-    // map(mapper: (data: this) => any) {
-    //   return mapper(this);
-    // }
   };
 }
 
