@@ -4,5 +4,6 @@
       "syntax": "typescript",
       "decorators": true
     }
-  }
+  },
+  "minify": true
 }
