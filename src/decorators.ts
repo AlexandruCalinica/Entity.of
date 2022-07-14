@@ -28,7 +28,7 @@ export function Model<T extends { new (...args: any[]): {} }>(constructor: T) {
   };
 }
 
-Model.producerOf = function <T>(): (data: Partial<Omit<T, "map">>) => T {
+Model.producerOf = function <T>(): (data: Partial<T>) => T {
   return function (data) {
     return data as T;
   };

@@ -1,5 +1,4 @@
-// @ts-ignore
-import { Field, Model } from "../dist/index.js";
+import { Field, Model } from "../dist/index";
 
 @Model
 class Entity {
