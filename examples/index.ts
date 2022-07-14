@@ -32,17 +32,13 @@ class Entity {
   nestedArr: Nested[] = [];
 
   static of = Model.producerOf<Entity>();
-
-  map(mapper: (data: Entity) => any) {
-    return mapper(this);
-  }
 }
 
 // const anyData = { some: "a", every: "b" } as any;
 // const unstableData = ({ foo: "baz", bra: "elo" } as unknown) as Entity;
 // const serverData = JSON.parse('{ "data": { "val": 1, "prop": 2 } }').data;
 // const wrongTypesData = JSON.parse(
-//   '{ "nested": 1, "name": {}, "optional": null }'
+//   '{ "nested": 1, "name": {}, "optional": null, foo: 1 }'
 // );
 
 // Entity.of(anyData);
@@ -57,12 +53,4 @@ class Entity {
 //   optional: false
 // });
 
-const entity = Entity.of({ name: "Alex" });
-
-const greet = entity.map(({ name }) => `Hello ${name}`);
-const goodbie = entity.map(({ name }) => `Goodbie, ${name}`);
-
-const obj = Entity.of({ name: "Alex" });
-const name = `Hello, ${obj.name} + ${obj.nested}`;
-
-console.log(greet);
+// const entity = Entity.of(wrongTypesData);
