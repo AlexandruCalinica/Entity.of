@@ -10,7 +10,8 @@
   "scripts": {
     "compile": "tsc --project tsconfig.build.json",
     "clean": "rm -rf dist",
-    "build": "npm run clean && npm run compile",
+    "build": "npm run clean && npm run compile && npm run copy:assets",
+    "copy:assets": "cp ./package.json ./dist/package.json",
     "test:unit": "jest",
     "semantic-release": "semantic-release"
   },
