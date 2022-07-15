@@ -13,7 +13,7 @@ jobs:
           node-version: "16"
           cache: "npm"
       - run: npm ci
-      - run: npm test:unit
+      - run: npm run test:unit
       - name: Release
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
