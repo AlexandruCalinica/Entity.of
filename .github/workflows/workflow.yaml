@@ -17,5 +17,4 @@ jobs:
       - name: Release
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        # run: npx semantic-release
-        run: echo "Release placeholder"
+        run: npx semantic-release
