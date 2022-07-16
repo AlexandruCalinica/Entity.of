@@ -10,7 +10,7 @@
   <img alt="" src="https://img.shields.io/npm/l/entity-of" />
 </a>
 
-**Entity.of** ensures that the data received over the wire matches your expectations. If it doesn't you'll know first.
+**Entity.of** ensures the data received over the wire matches your expectations. If it doesn't you'll know first.
 
 - ### 🕸 Data inconsistency catcher
 - ### 🦾 Declarative API contract enforcer
