@@ -1,9 +1,9 @@
-<div style="text-align: center; width: 100%;">
+<p align="center">
   <img width="auto" height="64px" alt="logo" src="https://github.com/AlexandruCalinica/Entity.of/blob/main/logo.png?raw=true" />
-</div>
-<h1 style="text-align: center;">Entity.of</h1>
+</p>
+<h1 align="center">Entity.of</h1>
 
-<div style="text-align:center; margin-bottom: 32px;">
+<p align="center" style="margin-bottom: 32px; width: 100%;">
   <a href="https://github.com/AlexandruCalinica/Entity.of/actions/workflows/workflow.yaml">
     <img alt="ci" src="https://github.com/AlexandruCalinica/Entity.of/actions/workflows/workflow.yaml/badge.svg?branch=main">
   </a>
@@ -19,7 +19,7 @@
   <A href="https://www.npmjs.com/package/entity-of">
     <img alt="" src="https://img.shields.io/npm/l/entity-of" />
   </a>
-</div>
+</p>
 
 **Entity.of** ensures the data received over the wire matches your expectations. If it doesn't you'll know first.
 
