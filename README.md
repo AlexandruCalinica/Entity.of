@@ -16,6 +16,7 @@
 - ### 🦾 Declarative API contract enforcer
 - ### 🛠 Standardized object constructor
 
-
-
 The motivation behind **Entity.of** comes from first degree encounters with broken APIs, out-of-date REST api documentations, unsynchronized graphql schemas + resolvers, third party services releasing breaking changes, and many more text-book or edge case situations causing bugs, unexplained behaviours, runtime errors and generally a bad user experience for end users.
+
+# Mindset
+Think about **Entity.of** as a sweet spot combination between **decorator pattern** and **type guard pattern**. The first one (decorator) is used to apply the second (type guard). There is also a third obvious component which without this library makes no sense - **ES6 Classes**.
