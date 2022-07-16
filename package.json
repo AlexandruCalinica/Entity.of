@@ -10,6 +10,7 @@
   ],
   "scripts": {
     "compile": "tsc --project tsconfig.build.json",
+    "cz": "cz",
     "clean": "rm -rf dist",
     "build": "npm run clean && npm run compile && npm run copy:assets",
     "copy:assets": "cp ./package.json ./dist/package.json",
