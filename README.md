@@ -1,4 +1,4 @@
-# Entity.of 👻
+# Entity.of ![logo](https://github.com/AlexandruCalinica/Entity.of/blob/main/logo.png?raw=true)
 
 [![CI](https://github.com/AlexandruCalinica/Entity.of/actions/workflows/workflow.yaml/badge.svg?branch=main)](https://github.com/AlexandruCalinica/Entity.of/actions/workflows/workflow.yaml)
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
