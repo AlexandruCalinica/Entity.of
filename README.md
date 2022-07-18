@@ -31,3 +31,9 @@ The motivation behind **Entity.of** comes from first degree encounters with brok
 
 # Mindset
 Think about **Entity.of** as a sweet spot combination between **decorator pattern** and **type guard pattern**. The first one (decorator) is used to apply the second (type guard). There is also a third obvious component which without this library makes no sense - **ES6 Classes**.
+
+
+https://user-images.githubusercontent.com/45464946/179451398-4b65c7b1-969f-4f77-a06f-d57acc7b53b4.mov
+
+
+
