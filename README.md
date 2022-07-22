@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="auto" height="64px" alt="logo" src="https://github.com/AlexandruCalinica/Entity.of/blob/main/logo.png?raw=true" />
+  <img width="auto" height="64px" alt="logo" src="https://github.com/AlexandruCalinica/Entity.of/blob/main/assets/logo.png?raw=true" />
 </p>
 <h1 align="center">Entity.of</h1>
 
@@ -37,6 +37,8 @@
 
 All backend services ideally implement some form of validation and sanitization for any incomming data.
 Why should'nt we consider a similar approach for client applications?
+
+<img width="auto" height="auto" alt="diagram" src="https://github.com/AlexandruCalinica/Entity.of/blob/main/assets/entityOf-diagram.svg?raw=true" />
 
 # Mindset
 Think about **Entity.of** as a sweet spot combination between **decorator pattern** and **type guard pattern**. The first one (decorator) is used to apply the second (type guard). There is also a third obvious component which without this library makes no sense - **ES6 Classes**.
