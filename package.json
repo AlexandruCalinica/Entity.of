@@ -14,7 +14,7 @@
     "clean": "rm -rf dist",
     "build": "npm run clean && npm run compile && npm run copy:assets",
     "copy:assets": "cp ./package.json ./dist/package.json",
-    "test:unit": "jest",
+    "test:unit": "jest --silent",
     "semantic-release": "semantic-release",
     "prepare": "husky install"
   },

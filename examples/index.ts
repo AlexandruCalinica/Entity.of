@@ -1,14 +1,14 @@
 import { mapObjectToEntity, getStore } from "../src/core";
-import { Field, Producer, Model } from "../src/decorators";
+import { Of, Producer, Entity } from "../src/decorators";
 
 console.clear();
 getStore().initStore();
 
 class Nested {
-  @Field(() => String)
+  @Of(() => String)
   id = "";
 
-  @Field(() => String)
+  @Of(() => String)
   country = "";
 
   @Producer
@@ -17,21 +17,21 @@ class Nested {
   }
 }
 
-@Model
-class Entity {
-  @Field(() => Nested)
+@Entity
+class MyThing {
+  @Of(() => Nested)
   nested: Nested = Nested.of({});
 
-  @Field(() => String)
+  @Of(() => String)
   name: string = "";
 
-  @Field(() => [Number])
+  @Of(() => [Number])
   optional?: number[];
 
-  @Field(() => [Nested])
+  @Of(() => [Nested])
   nestedArr: Nested[] = [];
 
-  static of = Model.producerOf<Entity>();
+  static of = Entity.of<MyThing>();
 }
 
 // const anyData = { some: "a", every: "b" } as any;

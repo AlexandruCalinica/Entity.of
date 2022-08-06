@@ -1,4 +1,4 @@
-import { Field } from "../src/decorators";
+import { Of } from "../src/decorators";
 
 expect.extend({
   toContainObject(received, argument) {
@@ -27,7 +27,7 @@ expect.extend({
   },
 });
 
-describe("Field", () => {
+describe("Of", () => {
   // given
   class User {}
   const stringFn = () => String;
@@ -39,14 +39,14 @@ describe("Field", () => {
   const producerFn = () => User;
   const producerArrFn = () => [User];
 
-  const stringDecorator = Field(stringFn);
-  const numberDecorator = Field(numberFn);
-  const booleanDecorator = Field(booleanFn);
-  const stringArrDecorator = Field(stringArrFn);
-  const numberArrDecorator = Field(numberArrFn);
-  const booleanArrDecorator = Field(booleanArrFn);
-  const producerDecorator = Field(producerFn);
-  const producerArrDecorator = Field(producerArrFn);
+  const stringDecorator = Of(stringFn);
+  const numberDecorator = Of(numberFn);
+  const booleanDecorator = Of(booleanFn);
+  const stringArrDecorator = Of(stringArrFn);
+  const numberArrDecorator = Of(numberArrFn);
+  const booleanArrDecorator = Of(booleanArrFn);
+  const producerDecorator = Of(producerFn);
+  const producerArrDecorator = Of(producerArrFn);
 
   it("Should add one/more class properties to a constructor static fields array", () => {
     // given

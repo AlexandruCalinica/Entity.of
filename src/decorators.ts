@@ -1,6 +1,6 @@
 import { createProducer } from "./core";
 
-export function Field(type?: () => any) {
+export function Of(type?: () => any) {
   return function (target: any, key: string) {
     const owner = target.constructor;
 
@@ -18,7 +18,7 @@ export function Producer(target: any, key: string) {
   target[key] = createProducer(target, key, initial);
 }
 
-export function Model<T extends { new (...args: any[]): {} }>(constructor: T) {
+export function Entity<T extends { new (...args: any[]): {} }>(constructor: T) {
   return class extends constructor {
     // solve constructor type -> inside createProducer;
     static of: (data: Partial<T>) => T = createProducer(
@@ -28,7 +28,7 @@ export function Model<T extends { new (...args: any[]): {} }>(constructor: T) {
   };
 }
 
-Model.producerOf = function <T>(): (data: Partial<T>) => T {
+Entity.of = function <T>(): (data: Partial<T>) => T {
   return function (data) {
     return data as T;
   };
