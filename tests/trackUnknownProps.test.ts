@@ -7,7 +7,7 @@ import {
 
 describe("trackUnknownProps", () => {
   beforeEach(() => {
-    getStore().resetStore();
+    getStore().reset();
   });
   // given
   class Address {
@@ -49,17 +49,19 @@ describe("trackUnknownProps", () => {
     { key: "address", type: () => Address },
     { key: "hobbies", type: () => [Hobby] },
   ];
-  const keysWithProducer = fieldsWithProducer.map(({ key }) => key);
   const producedEntries = produceEntries(data, fieldsWithProducer);
   const producedData = { ...data, ...producedEntries };
 
   it("Should exist store object on globalThis", () => {
     // asert
-    expect(globalThis).toHaveProperty("__s__");
-    expect((globalThis as any)["__s__"]).toEqual({
+    expect(globalThis).toHaveProperty("__ENTITY_OF__");
+    expect((globalThis as any)["__ENTITY_OF__"]).toEqual({
       unknown: {},
       mistyped: {},
       instances: {},
+      meta: {
+        enableWarnings: false,
+      },
     });
   });
 

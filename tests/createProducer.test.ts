@@ -1,4 +1,11 @@
-import { createProducer, FieldProps } from "../src/core";
+import { createProducer, FieldProps, getStore } from "../src/core";
+
+beforeAll(() => {
+  getStore().init();
+});
+afterAll(() => {
+  getStore().destroy();
+});
 
 describe("createProducer", () => {
   // given

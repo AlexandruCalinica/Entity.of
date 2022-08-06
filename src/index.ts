@@ -1,2 +1,2 @@
 export * from "./decorators";
-export { mapObjectToEntity } from "./core";
+export { createEntityStore, mapObjectToEntity } from "./core";

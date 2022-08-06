@@ -20,22 +20,31 @@ export type Ctr<T> = {
   of: (data: Partial<T>) => T;
 };
 
-export function getStore() {
-  const store = (globalThis as any).__s__;
+export type GetStoreOptions = {
+  enableWarnings?: boolean;
+};
 
-  function initStore() {
-    if (!(globalThis as any).__s__) {
-      (globalThis as any).__s__ = {
-        unknown: {},
-        mistyped: {},
-        instances: {},
-      };
+const getDefaultStoreValues = (options?: GetStoreOptions) => ({
+  unknown: {},
+  mistyped: {},
+  instances: {},
+  meta: {
+    enableWarnings: options?.enableWarnings ?? false,
+  },
+});
+
+export function getStore(options?: GetStoreOptions) {
+  const store = (globalThis as any).__ENTITY_OF__;
+
+  function init() {
+    if (!(globalThis as any).__ENTITY_OF__) {
+      (globalThis as any).__ENTITY_OF__ = getDefaultStoreValues(options);
     }
   }
 
-  function registerEntity(owner: string) {
+  function register(owner: string) {
     let store = {
-      ...(globalThis as any).__s__,
+      ...(globalThis as any).__ENTITY_OF__,
     };
 
     if (!store.unknown[owner]) {
@@ -53,16 +62,16 @@ export function getStore() {
       };
     }
 
-    (globalThis as any).__s__ = store;
+    (globalThis as any).__ENTITY_OF__ = store;
   }
 
-  function setStore<T>(
+  function set<T>(
     type: "unknown" | "mistyped" | "instances",
     owner: string,
     key: string
   ) {
     return function (updater: (prev: T) => T, initial?: T) {
-      let _s = (globalThis as any).__s__;
+      let _s = (globalThis as any).__ENTITY_OF__;
 
       _s[type][owner][key] = updater(
         (_s[type][owner][key] as T) || (initial as T)
@@ -70,25 +79,21 @@ export function getStore() {
     };
   }
 
-  function resetStore() {
-    (globalThis as any).__s__ = {
-      unknown: {},
-      mistyped: {},
-      instances: {},
-    };
+  function reset() {
+    (globalThis as any).__ENTITY_OF__ = getDefaultStoreValues(options);
   }
 
-  function destroyStore() {
-    delete (globalThis as any).__s__;
+  function destroy() {
+    delete (globalThis as any).__ENTITY_OF__;
   }
 
   return {
+    set,
+    init,
+    reset,
     store,
-    setStore,
-    initStore,
-    resetStore,
-    destroyStore,
-    registerEntity,
+    destroy,
+    register,
   };
 }
 
@@ -105,18 +110,19 @@ export function trackUnknownProps(
   targetKeys: string[]
 ) {
   const keysDiff = difference(inputKeys, targetKeys);
-  const { store, registerEntity, setStore } = getStore();
+  const { store, register, set } = getStore();
+  const shouldWarn = store.meta.enableWarnings;
 
   if (keysDiff.length) {
     const key = JSON.stringify(keysDiff);
-    const setUnknownCount = setStore<number>("unknown", owner, key);
+    const setUnknownCount = set<number>("unknown", owner, key);
 
     if (!store[owner]) {
-      registerEntity(owner);
+      register(owner);
     }
 
     setUnknownCount((count) => {
-      if (count === 0) {
+      if (shouldWarn && count === 0) {
         console.warn(
           `${owner} was initialized with unknown properties: ${keysDiff}`
         );
@@ -263,20 +269,21 @@ export function trackWrongValues(
     keysWithProducer
   );
 
-  const { store, registerEntity, setStore, initStore } = getStore();
-  initStore();
+  const { store, register, set, init } = getStore();
+  const shouldWarn = store.meta.enableWarnings;
+  init();
 
   if (!store?.mistyped[owner]) {
-    registerEntity(owner);
+    register(owner);
   }
 
   forIn(primitiveInputTypes, (v, k) => {
-    const setMistypedCount = setStore<number>("mistyped", owner, k);
+    const setMistypedCount = set<number>("mistyped", owner, k);
 
     if (Array.isArray(v)) {
       if (v.some((v) => !primitiveTargetTypes[k].includes(v))) {
         setMistypedCount((count) => {
-          if (count === 0) {
+          if (shouldWarn && count === 0) {
             console.warn(
               `<${owner}.${k}: ${allTargetTypes[k]}> property received a mistyped value: ${v}`
             );
@@ -290,7 +297,7 @@ export function trackWrongValues(
 
     if (primitiveTargetTypes[k] !== v) {
       setMistypedCount((count) => {
-        if (count === 0) {
+        if (shouldWarn && count === 0) {
           console.warn(
             `<${owner}.${k}: ${allTargetTypes[k]}> property received a mistyped value: ${v}`
           );
@@ -328,4 +335,8 @@ export function createProducer<T extends Ctr<T>>(
       ? callBack(producedData)
       : mapObjectToEntity(producedData, target);
   };
+}
+
+export function createEntityStore(options?: GetStoreOptions) {
+  getStore(options).init();
 }

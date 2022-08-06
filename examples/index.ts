@@ -2,7 +2,7 @@ import { mapObjectToEntity, getStore } from "../src/core";
 import { Of, Producer, Entity } from "../src/decorators";
 
 console.clear();
-getStore().initStore();
+getStore().init();
 
 class Nested {
   @Of(() => String)

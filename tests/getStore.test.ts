@@ -2,34 +2,55 @@ import { getStore } from "../src/core";
 
 describe("getStore", () => {
   beforeAll(() => {
-    getStore().destroyStore();
+    getStore().destroy();
   });
   afterEach(() => {
-    getStore().destroyStore();
+    getStore().destroy();
   });
 
   it("Should init store", () => {
     // given
-    const { initStore } = getStore();
+    const { init } = getStore();
 
     // act
-    initStore();
+    init();
 
     // assert
     expect(getStore().store).toEqual({
       unknown: {},
       mistyped: {},
       instances: {},
+      meta: {
+        enableWarnings: false,
+      },
+    });
+  });
+
+  it("Should init store with 'enableWarnings' = true", () => {
+    // given
+    const { init } = getStore({ enableWarnings: true });
+
+    // act
+    init();
+
+    // assert
+    expect(getStore().store).toEqual({
+      unknown: {},
+      mistyped: {},
+      instances: {},
+      meta: {
+        enableWarnings: true,
+      },
     });
   });
 
   it("Should register a new owner in the store", () => {
     // given
-    const { registerEntity, initStore } = getStore();
-    initStore();
+    const { register, init } = getStore();
+    init();
 
     // act
-    registerEntity("Entity");
+    register("Entity");
     const { store } = getStore();
 
     // assert
@@ -40,12 +61,12 @@ describe("getStore", () => {
 
   it("Should reset store", () => {
     // given
-    const { resetStore, registerEntity, initStore } = getStore();
-    initStore();
-    registerEntity("Entity");
+    const { reset, register, init } = getStore();
+    init();
+    register("Entity");
 
     // act
-    resetStore();
+    reset();
     const { store } = getStore();
 
     // assert
@@ -53,31 +74,34 @@ describe("getStore", () => {
       unknown: {},
       mistyped: {},
       instances: {},
+      meta: {
+        enableWarnings: false,
+      },
     });
   });
 
   it("Should destroy store", () => {
     // given
-    const { initStore, destroyStore } = getStore();
-    initStore();
+    const { init, destroy } = getStore();
+    init();
 
     // act
-    destroyStore();
+    destroy();
 
     // assert
     const { store } = getStore();
     expect(store).toBe(undefined);
-    expect((globalThis as any)["__s__"]).toBe(undefined);
+    expect((globalThis as any)["__ENTITY_OF__"]).toBe(undefined);
   });
 
   it("Should set store - unknown", () => {
     // given
     const owner = "Entity";
-    const { initStore, registerEntity, setStore } = getStore();
+    const { init, register, set } = getStore();
 
-    initStore();
-    registerEntity(owner);
-    const setUnknownCount = setStore<number>("unknown", owner, "foo");
+    init();
+    register(owner);
+    const setUnknownCount = set<number>("unknown", owner, "foo");
 
     // act
     setUnknownCount(() => 1, 0);
@@ -92,11 +116,11 @@ describe("getStore", () => {
   it("Should set store - mistyped", () => {
     // given
     const owner = "Entity";
-    const { initStore, registerEntity, setStore } = getStore();
+    const { init, register, set } = getStore();
 
-    initStore();
-    registerEntity(owner);
-    const setMistypedCount = setStore<number>("mistyped", owner, "foo");
+    init();
+    register(owner);
+    const setMistypedCount = set<number>("mistyped", owner, "foo");
 
     // act
     setMistypedCount(() => 1, 0);
@@ -111,11 +135,11 @@ describe("getStore", () => {
   it("Should set store - instances", () => {
     // given
     const owner = "Entity";
-    const { initStore, registerEntity, setStore } = getStore();
+    const { init, register, set } = getStore();
 
-    initStore();
-    registerEntity(owner);
-    const setInstancesCount = setStore<number>("instances", owner, "foo");
+    init();
+    register(owner);
+    const setInstancesCount = set<number>("instances", owner, "foo");
 
     // act
     setInstancesCount(() => 1, 0);

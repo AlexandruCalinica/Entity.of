@@ -7,7 +7,7 @@ import {
 
 describe("trackWrongValues", () => {
   beforeEach(() => {
-    getStore().resetStore();
+    getStore().reset();
   });
   // given
   class Address {
@@ -57,11 +57,14 @@ describe("trackWrongValues", () => {
   // assert
   it("Should exist store object on globalThis", () => {
     // asert
-    expect(globalThis).toHaveProperty("__s__");
-    expect((globalThis as any)["__s__"]).toEqual({
+    expect(globalThis).toHaveProperty("__ENTITY_OF__");
+    expect((globalThis as any)["__ENTITY_OF__"]).toEqual({
       unknown: {},
       mistyped: {},
       instances: {},
+      meta: {
+        enableWarnings: false,
+      },
     });
   });
 
