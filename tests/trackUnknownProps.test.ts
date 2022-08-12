@@ -58,7 +58,7 @@ describe("trackUnknownProps", () => {
     expect((globalThis as any)["__ENTITY_OF__"]).toEqual({
       unknown: {},
       mistyped: {},
-      instances: {},
+      entities: {},
       meta: {
         enableWarnings: false,
       },

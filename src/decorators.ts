@@ -1,6 +1,6 @@
-import { createProducer } from "./core";
+import { createProducer, FieldOptions } from "./core";
 
-export function Of(type?: () => any) {
+export function Of(type?: () => any, options?: FieldOptions) {
   return function (target: any, key: string) {
     const owner = target.constructor;
 
@@ -8,7 +8,7 @@ export function Of(type?: () => any) {
       owner.fields = [];
     }
 
-    owner.fields.push({ key, type });
+    owner.fields.push({ key, type, options });
   };
 }
 

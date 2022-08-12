@@ -1,4 +1,4 @@
-import { getInputTypes, produceEntries, FieldProps } from "../src/core";
+import { FieldProps, getInputTypes, produceEntries } from "../src/core";
 
 describe("getInputTypes", () => {
   // given
@@ -18,6 +18,20 @@ describe("getInputTypes", () => {
     { key: "hobbies", type: () => [Hobby] },
   ];
 
+  const fields: FieldProps[] = [
+    { key: "id", type: () => Number },
+    { key: "name", type: () => String },
+    { key: "surname", type: () => String },
+    { key: "address", type: () => Address },
+    { key: "children", type: () => [Number] },
+    { key: "isSingle", type: () => Boolean },
+    { key: "nullField", type: () => String },
+    { key: "nullList", type: () => [String] },
+    { key: "nullableField", type: () => String, options: { nullable: true } },
+    { key: "nullableList", type: () => [String], options: { nullable: true } },
+    { key: "hobbies", type: () => [Hobby] },
+  ];
+
   const data: Record<string, any> = {
     id: 1,
     name: "John",
@@ -29,6 +43,10 @@ describe("getInputTypes", () => {
     },
     children: [1, 2, 3],
     isSingle: false,
+    nullField: null,
+    nullList: [null, null, null],
+    nullableField: null,
+    nullableList: [null, null, null],
     hobbies: [
       { id: 1, name: "football" },
       { id: 2, name: "basketball" },
@@ -39,32 +57,45 @@ describe("getInputTypes", () => {
   const producedData = { ...data, ...producedEntries };
   const keysWithProducers = fieldsWithProducer.map(({ key }) => key);
 
+  const fieldsWithValues = fields.map((field) => ({
+    ...field,
+    value: producedData[field.key],
+  }));
+
   // act
   const { allInputTypes, primitiveInputTypes } = getInputTypes(
-    producedData,
+    fieldsWithValues,
     keysWithProducers
   );
 
   // assert
   it("Should output a dictionary of all input types", () => {
     expect(allInputTypes).toEqual({
-      id: "Number",
-      name: "String",
-      surname: "String",
-      address: "Address",
-      children: ["Number", "Number", "Number"],
-      isSingle: "Boolean",
-      hobbies: ["Hobby", "Hobby", "Hobby"],
+      id: "Primitive<Number>",
+      name: "Primitive<String>",
+      surname: "Primitive<String>",
+      address: "Primitive<Address>",
+      children: "Array<Number>",
+      isSingle: "Primitive<Boolean>",
+      nullField: "Null",
+      nullList: "Array<Null>",
+      nullableField: "Null",
+      nullableList: "Array<Null>",
+      hobbies: "Array<Hobby>",
     });
   });
 
   it("Should output a dictionary of primitive input types", () => {
     expect(primitiveInputTypes).toEqual({
-      id: "Number",
-      name: "String",
-      surname: "String",
-      children: ["Number", "Number", "Number"],
-      isSingle: "Boolean",
+      id: "Primitive<Number>",
+      name: "Primitive<String>",
+      surname: "Primitive<String>",
+      children: "Array<Number>",
+      isSingle: "Primitive<Boolean>",
+      nullField: "Null",
+      nullList: "Array<Null>",
+      nullableField: "Null",
+      nullableList: "Array<Null>",
     });
   });
 });

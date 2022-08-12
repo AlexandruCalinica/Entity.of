@@ -9,14 +9,23 @@ class User {
   @Of(() => String)
   name: string = "";
 
-  @Of(() => Number)
-  age: number = 0;
+  @Of(() => [Number], { nullable: true })
+  age: (number | null)[] | null = [null];
+
+  @Of(() => Number, { nullable: true })
+  friends: number | null = null;
+
+  @Of(() => String, { optional: true })
+  email?: string;
+
+  @Of(() => String, { optional: true, nullable: true })
+  foo?: string | null;
 
   static of = Entity.of<User>();
 }
 
 function App() {
-  const user = User.of({});
+  const user = User.of({ age: [0] });
 
   return (
     <div>

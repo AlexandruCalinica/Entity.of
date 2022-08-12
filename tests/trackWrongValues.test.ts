@@ -51,6 +51,10 @@ describe("trackWrongValues", () => {
   const keysWithProducer = fieldsWithProducer.map(({ key }) => key);
   const producedEntries = produceEntries(data, fieldsWithProducer);
   const producedData = { ...data, ...producedEntries };
+  const fieldsWithValues = fields.map((field) => ({
+    ...field,
+    value: producedData[field.key as keyof typeof data],
+  }));
 
   // act
 
@@ -61,7 +65,7 @@ describe("trackWrongValues", () => {
     expect((globalThis as any)["__ENTITY_OF__"]).toEqual({
       unknown: {},
       mistyped: {},
-      instances: {},
+      entities: {},
       meta: {
         enableWarnings: false,
       },
@@ -70,9 +74,12 @@ describe("trackWrongValues", () => {
 
   it("Should assign a store entry when calling with a mistyped value", () => {
     // given
-    const wrongData = { ...producedData, id: 1 };
+    const alteredFields = fieldsWithValues.map((field) => {
+      if (field.key === "id") return { ...field, value: 1 };
+      return field;
+    });
     // act
-    trackWrongValues(owner, fields, wrongData, keysWithProducer);
+    trackWrongValues(owner, alteredFields, keysWithProducer);
     // asert
     const { store } = getStore();
     expect(store["mistyped"][owner]).toEqual({ id: 1 });
@@ -80,10 +87,13 @@ describe("trackWrongValues", () => {
 
   it("Should increment an existing mistyped entry count", () => {
     // given
-    const wrongData = { ...producedData, id: 2 };
+    const alteredFields = fieldsWithValues.map((field) => {
+      if (field.key === "id") return { ...field, value: 2 };
+      return field;
+    });
     // act
-    trackWrongValues(owner, fields, wrongData, keysWithProducer);
-    trackWrongValues(owner, fields, wrongData, keysWithProducer);
+    trackWrongValues(owner, alteredFields, keysWithProducer);
+    trackWrongValues(owner, alteredFields, keysWithProducer);
     // assert
     const { store } = getStore();
     expect(store["mistyped"][owner]).toEqual({ id: 2 });
@@ -91,9 +101,14 @@ describe("trackWrongValues", () => {
 
   it("Should assign a store entry when calling with multiple mistyped values", () => {
     // given
-    const wrongData = { ...producedData, id: 1, name: {}, isSingle: 0 };
+    const alteredFields = fieldsWithValues.map((field) => {
+      if (field.key === "id") return { ...field, value: 1 };
+      if (field.key === "name") return { ...field, value: {} };
+      if (field.key === "isSingle") return { ...field, value: 0 };
+      return field;
+    });
     // act
-    trackWrongValues(owner, fields, wrongData, keysWithProducer);
+    trackWrongValues(owner, alteredFields, keysWithProducer);
     // asert
     const { store } = getStore();
     expect(store["mistyped"][owner]).toEqual({ id: 1, name: 1, isSingle: 1 });
@@ -101,10 +116,15 @@ describe("trackWrongValues", () => {
 
   it("Should increment an existing mistyped entry count - multiple values", () => {
     // given
-    const wrongData = { ...producedData, id: 1, name: {}, isSingle: 0 };
+    const alteredFields = fieldsWithValues.map((field) => {
+      if (field.key === "id") return { ...field, value: 1 };
+      if (field.key === "name") return { ...field, value: {} };
+      if (field.key === "isSingle") return { ...field, value: 0 };
+      return field;
+    });
     // act
     for (let i = 0; i < 1000; i++) {
-      trackWrongValues(owner, fields, wrongData, keysWithProducer);
+      trackWrongValues(owner, alteredFields, keysWithProducer);
     }
     // asert
     const { store } = getStore();

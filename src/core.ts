@@ -3,15 +3,25 @@ import omit from "lodash/omit";
 import forIn from "lodash/forIn";
 import difference from "lodash/difference";
 
-type MixedCtr<T> =
+export type MixedCtr<T> =
   | Ctr<T>
   | StringConstructor
   | BooleanConstructor
   | NumberConstructor;
 
+export type StoreOptions = {
+  enableWarnings?: boolean;
+};
+
+export type FieldOptions = {
+  nullable?: boolean;
+  optional?: boolean;
+};
+
 export type FieldProps = {
   key: string;
   type: (() => MixedCtr<any>) | (() => MixedCtr<any>[]);
+  options?: FieldOptions;
 };
 
 export type Ctr<T> = {
@@ -20,20 +30,16 @@ export type Ctr<T> = {
   of: (data: Partial<T>) => T;
 };
 
-export type GetStoreOptions = {
-  enableWarnings?: boolean;
-};
-
-const getDefaultStoreValues = (options?: GetStoreOptions) => ({
+const getDefaultStoreValues = (options?: StoreOptions) => ({
   unknown: {},
   mistyped: {},
-  instances: {},
+  entities: {},
   meta: {
     enableWarnings: options?.enableWarnings ?? false,
   },
 });
 
-export function getStore(options?: GetStoreOptions) {
+export function getStore(options?: StoreOptions) {
   const store = (globalThis as any).__ENTITY_OF__;
 
   function init() {
@@ -55,10 +61,10 @@ export function getStore(options?: GetStoreOptions) {
       store = { ...store, mistyped: { ...store.mistyped, [owner]: {} } };
     }
 
-    if (!store.instances[owner]) {
+    if (!store.entities[owner]) {
       store = {
         ...store,
-        instances: { ...store.instances, [owner]: {} },
+        entities: { ...store.entities, [owner]: {} },
       };
     }
 
@@ -66,7 +72,7 @@ export function getStore(options?: GetStoreOptions) {
   }
 
   function set<T>(
-    type: "unknown" | "mistyped" | "instances",
+    type: "unknown" | "mistyped" | "entities",
     owner: string,
     key: string
   ) {
@@ -75,6 +81,16 @@ export function getStore(options?: GetStoreOptions) {
 
       _s[type][owner][key] = updater(
         (_s[type][owner][key] as T) || (initial as T)
+      );
+    };
+  }
+
+  function setEntity(owner: string) {
+    return function (updater: (prev: any) => any, initial?: any) {
+      let _s = (globalThis as any).__ENTITY_OF__;
+
+      _s.entities[owner] = updater(
+        (_s.entities[owner] as any) || (initial as any)
       );
     };
   }
@@ -94,6 +110,7 @@ export function getStore(options?: GetStoreOptions) {
     store,
     destroy,
     register,
+    setEntity,
   };
 }
 
@@ -205,21 +222,74 @@ export function produceEntries(
   }, {});
 }
 
+export function extractInputTypes(fields: (FieldProps & { value: any })[]) {
+  return fields.reduce((acc, { key, options, value }) => {
+    let out: Record<string, string> = { ...acc };
+
+    if (typeof value === "undefined") {
+      if (options?.optional) {
+        return out;
+      }
+    }
+
+    if (value === null) {
+      out[key] = `Null`;
+      return out;
+    }
+
+    if (Array.isArray(value) && value.some((v) => v === null)) {
+      out[key] = `Array<Null>`;
+      return out;
+    }
+
+    const typeName = Array.isArray(value)
+      ? value[0]?.constructor?.name
+      : value?.constructor?.name;
+
+    if (Array.isArray(value)) {
+      out[key] = `Array<${typeName}>`;
+      return out;
+    }
+
+    out[key] = `Primitive<${typeName}>`;
+
+    return out;
+  }, {} as Record<string, string>);
+}
+
+export function extractTargetTypes(fields: (FieldProps & { value: any })[]) {
+  return fields.reduce((acc, { key, type, options }) => {
+    let out: Record<string, string> = { ...acc };
+
+    const typeName = Array.isArray(type())
+      ? (type() as MixedCtr<any>[])[0].name
+      : (type() as MixedCtr<any>).name;
+
+    if (options?.nullable) {
+      if (Array.isArray(type())) {
+        out[key] = `NullableArray<${typeName}>`;
+        return out;
+      }
+
+      out[key] = `NullablePrimitive<${typeName}>`;
+      return out;
+    }
+
+    if (Array.isArray(type())) {
+      out[key] = `Array<${typeName}>`;
+      return out;
+    }
+
+    out[key] = `Primitive<${typeName}>`;
+    return out;
+  }, {} as Record<string, string>);
+}
+
 export function getInputTypes(
-  producedData: Record<string, any>,
+  fields: (FieldProps & { value: any })[],
   keysWithProducer: string[]
 ) {
-  const allInputTypes: Record<string, any> = Object.entries(
-    producedData
-  ).reduce((prev, [key, value]) => {
-    if (Array.isArray(value)) {
-      return {
-        ...prev,
-        [key]: (value as any[]).map((v) => v.constructor.name),
-      };
-    }
-    return { ...prev, [key]: (value as any).constructor.name };
-  }, {});
+  const allInputTypes = extractInputTypes(fields);
 
   const primitiveInputTypes: Record<string, any> = omit(
     allInputTypes,
@@ -233,18 +303,10 @@ export function getInputTypes(
 }
 
 export function getTargetTypes(
-  fields: FieldProps[],
+  fields: (FieldProps & { value: any })[],
   keysWithProducer: string[]
 ) {
-  const allTargetTypes: Record<string, any> = fields.reduce(
-    (prev, { key, type }) => {
-      if (Array.isArray(type())) {
-        return { ...prev, [key]: [(type() as any[])[0].name] };
-      }
-      return { ...prev, [key]: (type() as any).name };
-    },
-    {}
-  );
+  const allTargetTypes = extractTargetTypes(fields);
 
   const primitiveTargetTypes: Record<string, any> = omit(
     allTargetTypes,
@@ -259,11 +321,10 @@ export function getTargetTypes(
 
 export function trackWrongValues(
   owner: string,
-  fields: FieldProps[],
-  producedData: Record<string, any>,
+  fields: (FieldProps & { value: any })[],
   keysWithProducer: string[]
 ) {
-  const { primitiveInputTypes } = getInputTypes(producedData, keysWithProducer);
+  const { primitiveInputTypes } = getInputTypes(fields, keysWithProducer);
   const { allTargetTypes, primitiveTargetTypes } = getTargetTypes(
     fields,
     keysWithProducer
@@ -277,29 +338,34 @@ export function trackWrongValues(
     register(owner);
   }
 
-  forIn(primitiveInputTypes, (v, k) => {
-    const setMistypedCount = set<number>("mistyped", owner, k);
+  forIn(primitiveInputTypes, (inputType, key) => {
+    const targetType: string = primitiveTargetTypes[key];
+    const setMistypedCount = set<number>("mistyped", owner, key);
 
-    if (Array.isArray(v)) {
-      if (v.some((v) => !primitiveTargetTypes[k].includes(v))) {
-        setMistypedCount((count) => {
-          if (shouldWarn && count === 0) {
-            console.warn(
-              `<${owner}.${k}: ${allTargetTypes[k]}> property received a mistyped value: ${v}`
-            );
-          }
-
-          return count + 1;
-        }, 0);
+    if (targetType.startsWith("NullableArray")) {
+      if (inputType === "Null" || inputType === "Array<Null>") {
+        return;
       }
-      return;
+      if (inputType.startsWith("Array") && targetType.includes(inputType)) {
+        return;
+      }
     }
 
-    if (primitiveTargetTypes[k] !== v) {
+    if (targetType.startsWith("NullablePrimitive")) {
+      if (inputType === "Null" || inputType === "Array<Null>") {
+        return;
+      }
+
+      if (targetType.includes(inputType)) {
+        return;
+      }
+    }
+
+    if (targetType !== inputType) {
       setMistypedCount((count) => {
         if (shouldWarn && count === 0) {
           console.warn(
-            `<${owner}.${k}: ${allTargetTypes[k]}> property received a mistyped value: ${v}`
+            `<${owner}.${key}: ${allTargetTypes[key]}> property received a mistyped value: ${inputType}`
           );
         }
 
@@ -309,6 +375,23 @@ export function trackWrongValues(
       return;
     }
   });
+}
+
+export function trackEntity(
+  name: string,
+  fields: (FieldProps & { value: any })[]
+) {
+  const { store, setEntity } = getStore();
+
+  if (!store?.entities || !store.entities[name]) return;
+
+  const { allTargetTypes } = getTargetTypes(fields, []);
+  const prev = JSON.stringify(allTargetTypes);
+  const next = JSON.stringify(store.entities[name]);
+
+  if (prev === next) return;
+
+  setEntity(name)(() => allTargetTypes);
 }
 
 export function createProducer<T extends Ctr<T>>(
@@ -328,15 +411,23 @@ export function createProducer<T extends Ctr<T>>(
     const producedEntries = produceEntries(data, fieldsWithProducer);
     const producedData = { ...data, ...producedEntries } as Partial<T>;
 
-    trackWrongValues(owner, fields, producedData, keysWithProducer);
-    trackUnknownProps(owner, inputKeys, targetKeys);
-
-    return callBack
+    const result = callBack
       ? callBack(producedData)
       : mapObjectToEntity(producedData, target);
+
+    const fieldsWithValues = fields.map((field) => ({
+      ...field,
+      value: result[field.key as keyof T],
+    }));
+
+    trackEntity(owner, fieldsWithValues);
+    trackWrongValues(owner, fieldsWithValues, keysWithProducer);
+    trackUnknownProps(owner, inputKeys, targetKeys);
+
+    return result;
   };
 }
 
-export function createEntityStore(options?: GetStoreOptions) {
+export function createEntityStore(options?: StoreOptions) {
   getStore(options).init();
 }

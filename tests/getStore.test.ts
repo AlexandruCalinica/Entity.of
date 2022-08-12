@@ -19,7 +19,7 @@ describe("getStore", () => {
     expect(getStore().store).toEqual({
       unknown: {},
       mistyped: {},
-      instances: {},
+      entities: {},
       meta: {
         enableWarnings: false,
       },
@@ -37,7 +37,7 @@ describe("getStore", () => {
     expect(getStore().store).toEqual({
       unknown: {},
       mistyped: {},
-      instances: {},
+      entities: {},
       meta: {
         enableWarnings: true,
       },
@@ -56,7 +56,7 @@ describe("getStore", () => {
     // assert
     expect(store["unknown"]).toEqual({ Entity: {} });
     expect(store["mistyped"]).toEqual({ Entity: {} });
-    expect(store["instances"]).toEqual({ Entity: {} });
+    expect(store["entities"]).toEqual({ Entity: {} });
   });
 
   it("Should reset store", () => {
@@ -73,7 +73,7 @@ describe("getStore", () => {
     expect(store).toEqual({
       unknown: {},
       mistyped: {},
-      instances: {},
+      entities: {},
       meta: {
         enableWarnings: false,
       },
@@ -132,22 +132,18 @@ describe("getStore", () => {
     expect(getStore().store["mistyped"][owner]).toEqual({ foo: 2 });
   });
 
-  it("Should set store - instances", () => {
+  it("Should set store - entities", () => {
     // given
     const owner = "Entity";
-    const { init, register, set } = getStore();
+    const { init, register, setEntity } = getStore();
 
     init();
     register(owner);
-    const setInstancesCount = set<number>("instances", owner, "foo");
 
     // act
-    setInstancesCount(() => 1, 0);
+    setEntity(owner)(() => ({ foo: 1 }));
+
     // assert
-    expect(getStore().store["instances"][owner]).toEqual({ foo: 1 });
-    // act
-    setInstancesCount((prev) => prev + 1);
-    // assert
-    expect(getStore().store["instances"][owner]).toEqual({ foo: 2 });
+    expect(getStore().store["entities"][owner]).toEqual({ foo: 1 });
   });
 });
