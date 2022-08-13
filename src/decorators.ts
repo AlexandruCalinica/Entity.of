@@ -19,13 +19,9 @@ export function Producer(target: any, key: string) {
 }
 
 export function Entity<T extends { new (...args: any[]): {} }>(constructor: T) {
-  return class extends constructor {
-    // solve constructor type -> inside createProducer;
-    static of: (data: Partial<T>) => T = createProducer(
-      constructor as any,
-      "of"
-    );
-  };
+  Object.assign(constructor, { of: createProducer(constructor as any, "of") });
+
+  return constructor;
 }
 
 Entity.of = function <T>(): (data: Partial<T>) => T {

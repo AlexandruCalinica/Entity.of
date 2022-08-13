@@ -205,21 +205,32 @@ export function produceEntries(
   initialData: Record<string, any>,
   fieldsWithProducer: FieldProps[]
 ): Record<string, any> {
-  return fieldsWithProducer.reduce((prev, { key, type }) => {
+  const result = fieldsWithProducer.reduce((acc, { key, type, options }) => {
+    if (options?.optional && typeof initialData[key] === "undefined") {
+      return acc;
+    }
+
+    if (options?.nullable && initialData[key] === null) {
+      return acc;
+    }
+
     if (Array.isArray(type())) {
       return {
-        ...prev,
-        [key]: (initialData[key] || []).map((v: any) =>
-          (type() as Ctr<any>[])[0].of(v)
-        ),
+        ...acc,
+        [key]: (initialData[key] || []).map((v: any) => {
+          if (options?.nullable) return v;
+          return (type() as Ctr<any>[])[0].of(v);
+        }),
       };
     }
 
     return {
-      ...prev,
+      ...acc,
       [key]: (type() as Ctr<any>).of(initialData[key]),
     };
   }, {});
+
+  return result;
 }
 
 export function extractInputTypes(fields: (FieldProps & { value: any })[]) {

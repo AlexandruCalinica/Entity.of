@@ -1,0 +1,14 @@
+{
+  "name": "entity-of-extension",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start:firefox": "web-ext run"
+  },
+  "author": "Alexandru Calinica",
+  "license": "ISC",
+  "devDependencies": {
+    "web-ext": "^7.2.0"
+  }
+}

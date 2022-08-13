@@ -5,6 +5,17 @@ import "./App.css";
 import { Entity, Of } from "entity-of";
 
 @Entity
+class Profile {
+  @Of(() => String, { optional: true })
+  foo?: string;
+
+  @Of(() => Number, { optional: true })
+  baz?: number;
+
+  static of = Entity.of<Profile>();
+}
+
+@Entity
 class User {
   @Of(() => String)
   name: string = "";
@@ -19,13 +30,18 @@ class User {
   email?: string;
 
   @Of(() => String, { optional: true, nullable: true })
-  foo?: string | null;
+  foo?: string | null = undefined;
+
+  @Of(() => Profile, { optional: true, nullable: true })
+  profile?: Profile | null;
 
   static of = Entity.of<User>();
 }
 
 function App() {
-  const user = User.of({ age: [0] });
+  const user = User.of({
+    profile: null,
+  });
 
   return (
     <div>
