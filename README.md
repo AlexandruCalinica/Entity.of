@@ -21,11 +21,11 @@
   </a>
 </p>
 
-**Entity.of** ensures the data received over the wire matches your expectations. If it doesn't you'll know first.
+<p align="center"><b>Entity.of</b> ensures the data received over the wire matches your expectations. If it doesn't you'll know first.</p>
 
-- ### 🕸 Data inconsistency catcher
-- ### 🦾 Declarative API contract enforcer
-- ### 🛠 Standardized object constructor
+- 🕸 Data inconsistency catcher
+- 🦾 Declarative API contract enforcer
+- 🛠 Standardized object constructor
 
 # Table of contents
 - [Table of contents](#table-of-contents)
@@ -39,6 +39,7 @@
 
 # Getting started
 ## Prerequisites
+Entity.of is framework agnostic, meaning that it should work with any typescript project that has support for experimentalDecorators enabled.
 - Typescript codebase
 - experimentalDecorator support enabled for the typescript compiler
 
