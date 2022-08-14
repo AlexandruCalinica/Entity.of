@@ -254,7 +254,9 @@ export function extractInputTypes(fields: (FieldProps & { value: any })[]) {
     }
 
     const typeName = Array.isArray(value)
-      ? value[0]?.constructor?.name
+      ? value.length > 0
+        ? value[0]?.constructor?.name
+        : "Empty"
       : value?.constructor?.name;
 
     if (Array.isArray(value)) {
@@ -370,6 +372,10 @@ export function trackWrongValues(
       if (targetType.includes(inputType)) {
         return;
       }
+    }
+
+    if (targetType.startsWith("Array") && inputType.includes("Empty")) {
+      return;
     }
 
     if (targetType !== inputType) {

@@ -14,45 +14,90 @@ describe("getInputTypes", () => {
   }
 
   const fieldsWithProducer: FieldProps[] = [
-    { key: "address", type: () => Address },
-    { key: "hobbies", type: () => [Hobby] },
+    { key: "entity", type: () => Address },
+    { key: "entityList", type: () => [Hobby] },
   ];
 
   const fields: FieldProps[] = [
-    { key: "id", type: () => Number },
-    { key: "name", type: () => String },
-    { key: "surname", type: () => String },
-    { key: "address", type: () => Address },
-    { key: "children", type: () => [Number] },
-    { key: "isSingle", type: () => Boolean },
+    { key: "number", type: () => Number },
+    { key: "string", type: () => String },
+    { key: "entity", type: () => Address },
+    { key: "numberList", type: () => [Number] },
+    { key: "bool", type: () => Boolean },
+    { key: "entityList", type: () => [Hobby] },
     { key: "nullField", type: () => String },
     { key: "nullList", type: () => [String] },
     { key: "nullableField", type: () => String, options: { nullable: true } },
     { key: "nullableList", type: () => [String], options: { nullable: true } },
-    { key: "hobbies", type: () => [Hobby] },
+    { key: "optionalField", type: () => String, options: { optional: true } },
+    { key: "optionalList", type: () => [String], options: { optional: true } },
+    {
+      key: "optionalListWithEmptyDefault",
+      type: () => [String],
+      options: { optional: true },
+    },
+    {
+      key: "optionalListWithDefaultValues",
+      type: () => [String],
+      options: { optional: true },
+    },
+    {
+      key: "optionalNullableList",
+      type: () => [String],
+      options: { optional: true, nullable: true },
+    },
+    {
+      key: "optionalNullableListWithNull",
+      type: () => [String],
+      options: { optional: true, nullable: true },
+    },
+    {
+      key: "optionalNullableListWithEmptyDefault",
+      type: () => [String],
+      options: { optional: true, nullable: true },
+    },
+    {
+      key: "optionalNullableListWithDefaultNulls",
+      type: () => [String],
+      options: { optional: true, nullable: true },
+    },
+    {
+      key: "optionalNullableListWithDefaultValues",
+      type: () => [String],
+      options: { optional: true, nullable: true },
+    },
   ];
 
   const data: Record<string, any> = {
-    id: 1,
-    name: "John",
-    surname: "Doe",
-    address: {
+    number: 1,
+    string: "John",
+    entity: {
       street: "Industrial Drive",
       nr: "26",
       zip: 123456,
     },
-    children: [1, 2, 3],
-    isSingle: false,
-    nullField: null,
-    nullList: [null, null, null],
-    nullableField: null,
-    nullableList: [null, null, null],
-    hobbies: [
+    numberList: [1, 2, 3],
+    bool: false,
+    entityList: [
       { id: 1, name: "football" },
       { id: 2, name: "basketball" },
       { id: 3, name: "boxing" },
     ],
+    nullField: null,
+    nullList: [null, null, null],
+    nullableField: null,
+    nullableList: [null, null, null],
+    optionalField: undefined,
+    optionalList: undefined,
+    optionalListWithEmptyDefault: [],
+    optionalListWithDefaultValues: ["1", "2", "3"],
+    optionalNullableList: undefined,
+    optionalNullableListWithNull: null,
+    optionalNullableListWithEmptyDefault: [],
+    optionalNullableListWithDefaultNulls: [null, null, null],
+    optionalNullableListWithDefaultValues: ["1", "2", "3"],
   };
+
   const producedEntries = produceEntries(data, fieldsWithProducer);
   const producedData = { ...data, ...producedEntries };
   const keysWithProducers = fieldsWithProducer.map(({ key }) => key);
@@ -71,31 +116,41 @@ describe("getInputTypes", () => {
   // assert
   it("Should output a dictionary of all input types", () => {
     expect(allInputTypes).toEqual({
-      id: "Primitive<Number>",
-      name: "Primitive<String>",
-      surname: "Primitive<String>",
-      address: "Primitive<Address>",
-      children: "Array<Number>",
-      isSingle: "Primitive<Boolean>",
+      number: "Primitive<Number>",
+      string: "Primitive<String>",
+      entity: "Primitive<Address>",
+      numberList: "Array<Number>",
+      bool: "Primitive<Boolean>",
       nullField: "Null",
       nullList: "Array<Null>",
       nullableField: "Null",
       nullableList: "Array<Null>",
-      hobbies: "Array<Hobby>",
+      entityList: "Array<Hobby>",
+      optionalListWithEmptyDefault: "Array<Empty>",
+      optionalListWithDefaultValues: "Array<String>",
+      optionalNullableListWithNull: "Null",
+      optionalNullableListWithEmptyDefault: "Array<Empty>",
+      optionalNullableListWithDefaultNulls: "Array<Null>",
+      optionalNullableListWithDefaultValues: "Array<String>",
     });
   });
 
   it("Should output a dictionary of primitive input types", () => {
     expect(primitiveInputTypes).toEqual({
-      id: "Primitive<Number>",
-      name: "Primitive<String>",
-      surname: "Primitive<String>",
-      children: "Array<Number>",
-      isSingle: "Primitive<Boolean>",
+      number: "Primitive<Number>",
+      string: "Primitive<String>",
+      numberList: "Array<Number>",
+      bool: "Primitive<Boolean>",
       nullField: "Null",
       nullList: "Array<Null>",
       nullableField: "Null",
       nullableList: "Array<Null>",
+      optionalListWithEmptyDefault: "Array<Empty>",
+      optionalListWithDefaultValues: "Array<String>",
+      optionalNullableListWithNull: "Null",
+      optionalNullableListWithEmptyDefault: "Array<Empty>",
+      optionalNullableListWithDefaultNulls: "Array<Null>",
+      optionalNullableListWithDefaultValues: "Array<String>",
     });
   });
 });

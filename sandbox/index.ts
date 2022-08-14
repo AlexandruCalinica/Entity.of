@@ -30,6 +30,9 @@ class User {
   @Of(() => [Profile], { optional: true, nullable: true })
   profile?: (Profile | null)[] | null;
 
+  @Of(() => [String], { optional: true })
+  optionalStringArray?: string[] = [];
+
   static of = Entity.of<User>();
 }
 

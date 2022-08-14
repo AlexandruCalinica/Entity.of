@@ -28,6 +28,22 @@ describe("trackWrongValues", () => {
     { key: "address", type: () => Address },
     { key: "isSingle", type: () => Boolean },
     { key: "hobbies", type: () => [Hobby] },
+    {
+      key: "bestFriendNullable",
+      type: () => String,
+      options: { nullable: true },
+    },
+    {
+      key: "bestFriendOptional",
+      type: () => String,
+      options: { optional: true },
+    },
+    { key: "friendsIds", type: () => [String], options: { optional: true } },
+    {
+      key: "friendsIdsNullable",
+      type: () => [String],
+      options: { optional: true, nullable: true },
+    },
   ];
   const data = {
     id: "1",
@@ -42,6 +58,10 @@ describe("trackWrongValues", () => {
       { id: 2, name: "basketball" },
       { id: 3, name: "boxing" },
     ],
+    bestFriendNullable: null,
+    bestFriendOptional: undefined,
+    friendsIds: [],
+    friendsIdsNullable: [null],
   };
 
   const fieldsWithProducer = [

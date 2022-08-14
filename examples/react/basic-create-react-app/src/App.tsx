@@ -35,6 +35,9 @@ class User {
   @Of(() => Profile, { optional: true, nullable: true })
   profile?: Profile | null;
 
+  @Of(() => [String], { optional: true })
+  friendsIds?: string[] = [];
+
   static of = Entity.of<User>();
 }
 

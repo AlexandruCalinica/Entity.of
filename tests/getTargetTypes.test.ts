@@ -41,6 +41,30 @@ describe("getTargetTypes", () => {
       value: [null, null, null],
       options: { nullable: true },
     },
+    {
+      key: "optionalField",
+      type: () => String,
+      value: undefined,
+      options: { optional: true },
+    },
+    {
+      key: "optionalFieldList",
+      type: () => [String],
+      value: undefined,
+      options: { optional: true },
+    },
+    {
+      key: "optionalNullableField",
+      type: () => String,
+      value: undefined,
+      options: { optional: true, nullable: true },
+    },
+    {
+      key: "optionalNullableFieldList",
+      type: () => [String],
+      value: undefined,
+      options: { optional: true, nullable: true },
+    },
   ];
   const keysWithProducer = ["address", "hobbies"];
 
@@ -62,6 +86,10 @@ describe("getTargetTypes", () => {
       nullList: "Array<String>",
       nullableField: "NullablePrimitive<String>",
       nullableList: "NullableArray<String>",
+      optionalField: "Primitive<String>",
+      optionalFieldList: "Array<String>",
+      optionalNullableField: "NullablePrimitive<String>",
+      optionalNullableFieldList: "NullableArray<String>",
     });
   });
 
@@ -74,6 +102,10 @@ describe("getTargetTypes", () => {
       nullList: "Array<String>",
       nullableField: "NullablePrimitive<String>",
       nullableList: "NullableArray<String>",
+      optionalField: "Primitive<String>",
+      optionalFieldList: "Array<String>",
+      optionalNullableField: "NullablePrimitive<String>",
+      optionalNullableFieldList: "NullableArray<String>",
     });
   });
 });
