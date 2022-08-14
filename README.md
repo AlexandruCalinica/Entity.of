@@ -27,6 +27,16 @@
 - ### 🦾 Declarative API contract enforcer
 - ### 🛠 Standardized object constructor
 
+# Table of contents
+- [Table of contents](#table-of-contents)
+- [Getting started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Install](#install)
+  - [Setup tsconfig.json](#setup-tsconfigjson)
+- [Motivation](#motivation)
+- [Simplified problem statement](#simplified-problem-statement)
+- [Solution](#solution)
+
 # Getting started
 ## Prerequisites
 - Typescript codebase
