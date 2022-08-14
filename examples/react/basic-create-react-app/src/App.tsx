@@ -38,6 +38,9 @@ class User {
   @Of(() => [String], { optional: true })
   friendsIds?: string[] = [];
 
+  @Of(() => [String], { nullable: true })
+  enemyIds: string[] | null = [];
+
   static of = Entity.of<User>();
 }
 

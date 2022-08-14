@@ -356,7 +356,11 @@ export function trackWrongValues(
     const setMistypedCount = set<number>("mistyped", owner, key);
 
     if (targetType.startsWith("NullableArray")) {
-      if (inputType === "Null" || inputType === "Array<Null>") {
+      if (
+        inputType === "Null" ||
+        inputType === "Array<Null>" ||
+        inputType === "Array<Empty>"
+      ) {
         return;
       }
       if (inputType.startsWith("Array") && targetType.includes(inputType)) {
