@@ -29,13 +29,21 @@
 
 # Table of contents
 - [Table of contents](#table-of-contents)
+- [Introduction](#introduction)
 - [Getting started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Install](#install)
   - [Setup tsconfig.json](#setup-tsconfigjson)
+  - [Create your first entity](#create-your-first-entity)
+- [API](#api)
+  - [createEntityStore](#createentitystoreoptions-storeoptions-void)
+  - [@Entity](#entity)
+  - [@Of](#of)
 - [Motivation](#motivation)
 - [Simplified problem statement](#simplified-problem-statement)
 - [Solution](#solution)
+
+# Introduction
 
 # Getting started
 ## Prerequisites
@@ -62,6 +70,79 @@ Open your project's `tsconfig.json` and add the following line in the `compiler`
 }
 ```
 You're all set.
+
+## Create your first entity
+```ts
+import { Entity, Of, createEntityStore } from 'entity-of';
+
+createEntityStore()
+
+@Entity
+class User {
+  @Of(() => String)
+  id = '';
+  
+  @Of(() => String)
+  name = ''
+  
+  @Of(() => String)
+  email = ''
+  
+  @Of(() => Number)
+  age = 0
+  
+  @Of(() => Boolean)
+  isMarried = false
+  
+  static of = Entity.of<User>();
+}
+
+User.of({});
+// => { id: '', name: '', email: '', age: 0, isMarried: false }
+```
+
+# API
+## createEntityStore(options?: StoreOptions): void;
+This function must be called as early as possible in the codebase and only once. It's purpose is to instantiate a global object which acts as a state store for all the entities declared.
+
+```ts
+// ...all imports
+
+createEntityStore();
+
+// ...all entities should be used after
+```
+Store can be accessed at anytime in the browser console by typing `window.__ENTITY_OF__`.
+
+At the moment, `StoreOptions` contains only one property named `enableWarnings`. `createEntityStore` can be initialized with this option in order to start logging warnings in the console about unknown properties or mistyped values.
+
+```ts
+createEntityStore({ enableWarnings: true });
+```
+This flag can also be used to enable console warnings only in development mode while keeping the production clear.
+```ts
+const enableWarnings = process.env.MODE === 'development';
+createEntityStore({ enableWarnings });
+```
+
+## @Entity
+In order to declare and register a new entity model, `@Entity` is used to decorate the class with a static producer method called `.of()` that will be used to construct entity objects.
+
+```ts
+@Entity
+class User {
+  /** class properties */
+  
+  static of = Entity.of<User>();
+}
+```
+Although the `@Entity` decorator itself does the whole work of adding the static producer method on the class, it cannot change the initial class type signature, so in order to have correct typing on this method we must declare it manualy like so:
+```ts
+static of = Entity.of<User>();
+```
+`Entity.of` does not add any actual functionality to the class, it's just an empty placeholder function that does the correct typing, so it will have no effect if the class itself is not decorated in the first place.
+
+## @Of
 
 # Motivation
 **Entity.of** was born as a byproduct of first degree encounters with:
