@@ -38,7 +38,9 @@
 - [API](#api)
   - [createEntityStore](#createentitystoreoptions-storeoptions-void)
   - [@Entity](#entity)
-  - [@Of](#of)
+  - [@Of](#oftype---any-options-fieldoptions)
+  - [@Producer](#producer)
+  - [mapObjectToEntity](#mapobjecttoentitydata-partial-of-t-entity-ctr-of-t-t)
 - [Motivation](#motivation)
 - [Simplified problem statement](#simplified-problem-statement)
 - [Solution](#solution)
@@ -142,7 +144,110 @@ static of = Entity.of<User>();
 ```
 `Entity.of` does not add any actual functionality to the class, it's just an empty placeholder function that does the correct typing, so it will have no effect if the class itself is not decorated in the first place.
 
-## @Of
+## @Of(type?: () => any, options?: FieldOptions)
+`@Of` is used to decorate entity class properties. It's purpose is to register a class property as an **entity field** and along with it to describe the returned **type**.
+```ts
+@Entity
+class User {
+  @Of(() => String)
+  name = ''
+  
+  static of = Entity<User>();
+}
+```
+
+First passed argument must be a function that returns the desired type in the form of:
+```ts
+// primitive constructors
+() => String
+() => Number
+() => Boolean
+() => [String] // describes an array of strings
+() => [Number] // describes an array of numbers
+() => [Boolean] // describes an array of booleans
+
+// entity classes/constructors
+() => User
+() => [User] // describes an array of users
+
+// NOT OK
+() => null
+() => undefined
+() => ''
+() => 0
+() => false
+() => {}
+() => Object
+() => []
+
+// Not yet implemented but considered
+() => [String, Number, Boolean, User] // describes an array containing any of the enumerated types
+```
+
+The `@Of` decorator can also describe if the field is **nullable** or **optional**.
+```ts
+@Entity
+class User {
+  @Of(() => String, { nullable: true, optional: true })
+  name?: string | null
+  
+  static of = Entity<User>();
+}
+```
+Tip: If a field must receive as value an array containing some values but also `null`, then the `nullable: true` flag must be passed as option in the decorator:
+```ts
+@Entity
+class User {
+  @Of(() => String, { nullable: true })
+  name?: (string | null)[] = []
+  
+  static of = Entity<User>();
+}
+
+User.of({ name: [null, 1, 2] }) // typing is ok now.
+```
+
+## @Producer
+The scope of this decorator is to allow the consumers of this library to create their own custom static `.of()` method(we'll call this the `producer method`). There might be usecases where you need little bit more than what standard `Entity.of` method is offering, so here's a basic example where we implement an entity with a custom producer method:
+```ts
+class User {
+  @Of(() => String)
+  id = '';
+  
+  @Of(() => String)
+  name = ''
+  
+  @Of(() => String)
+  email = ''
+  
+  @Producer
+  static of(data: Partial<User>): User {
+    logEntity('User', data);
+    
+    return {
+      id: data.id ?? '',
+      name: data.name ?? '',
+      email: data.email ?? ''
+    }
+  }
+}
+```
+Warning: This approach bypasses entirely the tracking features Entity.of provides via the standard usage. In order to make the tracking work with a custom producer method, check the below `mapObjectToEntity` example.
+
+## mapObjectToEntity(data: Partial of T, Entity: Ctr of T): T
+This function is what the static producer method `.of()` uses internally.
+```ts
+static of = Entity.of<User>()
+  
+// is the same as
+
+@Producer
+static of(data: Partial<User>): User {
+  // some custom logic here...
+  return mapObjectToEntity(data, User); // keep the same return behaviour
+}
+```
+This function is exported from the library also to be used with custom usecases and also provide all the tracking features.
 
 # Motivation
 **Entity.of** was born as a byproduct of first degree encounters with:
