@@ -36,11 +36,14 @@
   - [Setup tsconfig.json](#setup-tsconfigjson)
   - [Create your first entity](#create-your-first-entity)
 - [API](#api)
-  - [createEntityStore](#createentitystoreoptions-storeoptions-void)
+  - [createEntityStore(options?: StoreOptions): void;](#createentitystoreoptions-storeoptions-void)
   - [@Entity](#entity)
-  - [@Of](#oftype---any-options-fieldoptions)
+  - [@Of(type?: () => any, options?: FieldOptions)](#oftype---any-options-fieldoptions)
   - [@Producer](#producer)
-  - [mapObjectToEntity](#mapobjecttoentitydata-partial-of-t-entity-ctr-of-t-t)
+  - [mapObjectToEntity(data: Partial of T, Entity: Ctr of T): T](#mapobjecttoentitydata-partial-of-t-entity-ctr-of-t-t)
+- [Trouble Shooting](#trouble-shooting)
+  - [Caveats](#caveats)
+    - [Self referencing entities](#self-referencing-entities)
 - [Motivation](#motivation)
 - [Simplified problem statement](#simplified-problem-statement)
 - [Solution](#solution)
@@ -248,6 +251,45 @@ static of(data: Partial<User>): User {
 }
 ```
 This function is exported from the library also to be used with custom usecases and also provide all the tracking features.
+
+# Trouble Shooting
+The only known issue at the moment is about self referencing or cyclic entities that are causing stack overflows due to recurring `.of()` calls.
+
+## Caveats
+### Self referencing entities
+- The self referencing property must be optional (and nullable if it’s the case) in order to not cause infinite recursion.
+- The property initialiser should either be undefined or null but never it’s own static of method.
+  
+OK:
+```js
+@Entity
+class A {
+  @Of(() => A, { optional: true })
+  a?: A;
+
+  static of = Entity.of<A>();
+}
+
+// or with null initializer
+
+@Entity
+class A {
+  @Of(() => A, { optional: true, nullable: true })
+  a?: A | null = null
+
+  static of = Entity.of<A>();
+}
+```
+NOT OK:
+```js
+@Entity
+class A {
+  @Of(() => A)
+  a: A = A.of({}) // initializer gets called and it's recursive
+
+  static of = Entity.of<A>();
+}
+```
 
 # Motivation
 **Entity.of** was born as a byproduct of first degree encounters with:
