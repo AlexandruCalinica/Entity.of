@@ -5,6 +5,7 @@ import difference from "lodash/difference";
 
 export type MixedCtr<T> =
   | Ctr<T>
+  | Record<string, Ctr<T>>
   | StringConstructor
   | BooleanConstructor
   | NumberConstructor;
@@ -114,7 +115,10 @@ export function getStore(options?: StoreOptions) {
   };
 }
 
-export function mapObjectToEntity<T>(data: Partial<T>, Entity: Ctr<T>) {
+export function mapObjectToEntity<T extends object>(
+  data: Partial<T>,
+  Entity: Ctr<T>
+) {
   const fields = Entity.fields || [];
   const keys = fields.map(({ key }) => key);
 
@@ -168,7 +172,72 @@ export function isProducerField(
       );
     }
 
+    if (
+      typeof (type() as any[])[0] === "object" &&
+      (type() as any[])[0] !== null
+    ) {
+      if (Object.values((type() as any[])[0])[0] === Object) {
+        throw new Error(
+          `${key} 'type' function should not return an array of records containing primitive Object constructors as values`
+        );
+      }
+      if (Object.values((type() as any[])[0])[0] === Array) {
+        throw new Error(
+          `${key} 'type' function should not return an array of records containing primitive Array constructors as values`
+        );
+      }
+      if (Object.values((type() as any[])[0])[0] === Number) {
+        throw new Error(
+          `${key} 'type' function should not return an array of records containing primitive Number constructors as values`
+        );
+      }
+      if (Object.values((type() as any[])[0])[0] === String) {
+        throw new Error(
+          `${key} 'type' function should not return an array of records containing primitive String constructors as values`
+        );
+      }
+      if (Object.values((type() as any[])[0])[0] === Boolean) {
+        throw new Error(
+          `${key} 'type' function should not return an array of records containing primitive Boolean constructors as values`
+        );
+      }
+
+      return Object.values(
+        (type() as Record<string, any>[])[0]
+      )[0].hasOwnProperty(producerName);
+    }
+
     return (type() as any[])[0].hasOwnProperty(producerName);
+  }
+
+  if (typeof type() === "object" && !Array.isArray(type()) && type() !== null) {
+    if (Object.values(type())[0] === Object) {
+      throw new Error(
+        `${key} 'type' function should not return a record containing a primitive Object constructor as value`
+      );
+    }
+    if (Object.values(type())[0] === Array) {
+      throw new Error(
+        `${key} 'type' function should not return a record containing a primitive Array constructor as value`
+      );
+    }
+    if (Object.values(type())[0] === Number) {
+      throw new Error(
+        `${key} 'type' function should not return a record containing a primitive Number constructor as value`
+      );
+    }
+    if (Object.values(type())[0] === String) {
+      throw new Error(
+        `${key} 'type' function should not return a record containing a primitive String constructor as value`
+      );
+    }
+    if (Object.values(type())[0] === Boolean) {
+      throw new Error(
+        `${key} 'type' function should not return a record containing a primitive Boolean constructor as value`
+      );
+    }
+
+    return Object.values(type())[0].hasOwnProperty(producerName);
   }
 
   if (type() === Array) {
@@ -187,7 +256,7 @@ export function isProducerField(
     return false;
   } else {
     if (!(type() as any).hasOwnProperty(producerName)) {
-      throw new Error("error");
+      throw new Error("Missing producer method - of");
     }
 
     return true;
@@ -215,12 +284,45 @@ export function produceEntries(
     }
 
     if (Array.isArray(type())) {
+      if (
+        typeof (type() as Ctr<any>[])[0] === "object" &&
+        (type() as Ctr<any>[])[0] !== null
+      ) {
+        return {
+          ...acc,
+          [key]: (initialData[key] || []).map((item: any) => {
+            return Object.entries(item).reduce((acc, curr) => {
+              const [k, v] = curr;
+              const entity = Object.values(
+                (type() as Record<string, Ctr<any>>[])[0]
+              )[0];
+              return { ...acc, [k]: entity.of(v as any) };
+            }, {});
+          }),
+        };
+      }
+
       return {
         ...acc,
         [key]: (initialData[key] || []).map((v: any) => {
           if (options?.nullable) return v;
           return (type() as Ctr<any>[])[0].of(v);
         }),
+      };
+    }
+
+    if (
+      typeof type() === "object" &&
+      !Array.isArray(type()) &&
+      type() !== null
+    ) {
+      return {
+        ...acc,
+        [key]: Object.entries(initialData[key] || []).reduce((acc, curr) => {
+          const [k, v] = curr;
+          const entity = Object.values(type() as Record<string, Ctr<any>>)[0];
+          return { ...acc, [k]: entity.of(v as any) };
+        }, {}),
       };
     }
 
@@ -271,31 +373,68 @@ export function extractInputTypes(fields: (FieldProps & { value: any })[]) {
 }
 
 export function extractTargetTypes(fields: (FieldProps & { value: any })[]) {
-  return fields.reduce((acc, { key, type, options }) => {
+  const result = fields.reduce((acc, { key, type, options }) => {
     let out: Record<string, string> = { ...acc };
 
-    const typeName = Array.isArray(type())
-      ? (type() as MixedCtr<any>[])[0].name
-      : (type() as MixedCtr<any>).name;
+    let typeName = "";
+
+    if (Array.isArray(type())) {
+      if (
+        typeof (type() as Record<string, MixedCtr<any>>[])[0] === "object" &&
+        (type() as Record<string, MixedCtr<any>>[])[0] !== null
+      ) {
+        typeName = Object.values((type() as MixedCtr<any>[])[0])[0].name;
+      } else {
+        typeName = (type() as MixedCtr<any>[])[0].name as string;
+      }
+    } else {
+      if (
+        typeof type() === "object" &&
+        !Array.isArray(type()) &&
+        type() !== null
+      ) {
+        typeName = Object.values(type() as MixedCtr<any>)[0].name;
+      } else {
+        typeName = (type() as MixedCtr<any>).name as string;
+      }
+    }
 
     if (options?.nullable) {
       if (Array.isArray(type())) {
+        if (typeof (type() as any[])[0] === "object") {
+          out[key] = `NullableArray<Record<${typeName}>>`;
+          return out;
+        }
         out[key] = `NullableArray<${typeName}>`;
         return out;
       }
 
+      if (typeof type() === "object") {
+        out[key] = `NullablePrimitive<Record<${typeName}>>`;
+        return out;
+      }
       out[key] = `NullablePrimitive<${typeName}>`;
       return out;
     }
 
     if (Array.isArray(type())) {
+      if (typeof (type() as any[])[0] === "object") {
+        out[key] = `Array<Record<${typeName}>>`;
+        return out;
+      }
       out[key] = `Array<${typeName}>`;
       return out;
     }
 
+    if (typeof type() === "object") {
+      out[key] = `Primitive<Record<${typeName}>>`;
+      return out;
+    }
     out[key] = `Primitive<${typeName}>`;
     return out;
   }, {} as Record<string, string>);
+
+  return result;
 }
 
 export function getInputTypes(
@@ -402,13 +541,16 @@ export function trackEntity(
   name: string,
   fields: (FieldProps & { value: any })[]
 ) {
-  const { store, setEntity } = getStore();
+  const { store, setEntity, register } = getStore();
 
-  if (!store?.entities || !store.entities[name]) return;
+  if (!store?.entities) return;
+  if (!store.entities[name]) {
+    register(name);
+  }
 
   const { allTargetTypes } = getTargetTypes(fields, []);
   const prev = JSON.stringify(allTargetTypes);
-  const next = JSON.stringify(store.entities[name]);
+  const next = JSON.stringify(getStore().store.entities[name]);
 
   if (prev === next) return;
 

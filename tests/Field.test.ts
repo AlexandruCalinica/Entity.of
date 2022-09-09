@@ -38,6 +38,8 @@ describe("Of", () => {
   const booleanArrFn = () => [Boolean];
   const producerFn = () => User;
   const producerArrFn = () => [User];
+  const producerRecordFn = () => ({ User });
+  const producerRecordArrFn = () => [{ User }];
 
   const stringDecorator = Of(stringFn);
   const numberDecorator = Of(numberFn);
@@ -47,6 +49,8 @@ describe("Of", () => {
   const booleanArrDecorator = Of(booleanArrFn);
   const producerDecorator = Of(producerFn);
   const producerArrDecorator = Of(producerArrFn);
+  const producerRecordDecorator = Of(producerRecordFn);
+  const producerRecordArrDecorator = Of(producerRecordArrFn);
 
   it("Should add one/more class properties to a constructor static fields array", () => {
     // given
@@ -60,9 +64,11 @@ describe("Of", () => {
     booleanArrDecorator(Entity, "friends");
     producerDecorator(Entity, "user");
     producerArrDecorator(Entity, "users");
+    producerRecordDecorator(Entity, "userRecord");
+    producerRecordArrDecorator(Entity, "userRecordArr");
     // assert
     expect(Entity.constructor).toHaveProperty("fields");
-    expect((Entity.constructor as any)["fields"]).toHaveLength(8);
+    expect((Entity.constructor as any)["fields"]).toHaveLength(10);
     expect((Entity.constructor as any)["fields"]).toContainObject({
       key: "name",
       type: stringFn,
@@ -94,6 +100,14 @@ describe("Of", () => {
     expect((Entity.constructor as any)["fields"]).toContainObject({
       key: "users",
       type: producerArrFn,
+    });
+    expect((Entity.constructor as any)["fields"]).toContainObject({
+      key: "userRecord",
+      type: producerRecordFn,
+    });
+    expect((Entity.constructor as any)["fields"]).toContainObject({
+      key: "userRecordArr",
+      type: producerRecordArrFn,
     });
   });
 

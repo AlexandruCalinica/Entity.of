@@ -27,6 +27,16 @@ describe("getTargetTypes", () => {
       type: () => [Hobby],
       value: [{ id: 1, description: "Football" }],
     },
+    {
+      key: "recordOfHobbies",
+      type: () => ({ Hobby }),
+      value: { a: { id: 1, description: "Football" } },
+    },
+    {
+      key: "arrayOfRecordsOfHobbies",
+      type: () => [{ Hobby }],
+      value: [{ a: { id: 1, description: "Football" } }],
+    },
     { key: "nullField", type: () => String, value: null },
     { key: "nullList", type: () => [String], value: [null, null, null] },
     {
@@ -65,6 +75,30 @@ describe("getTargetTypes", () => {
       value: undefined,
       options: { optional: true, nullable: true },
     },
+    {
+      key: "optionalRecord",
+      type: () => ({ Hobby }),
+      value: undefined,
+      options: { optional: true },
+    },
+    {
+      key: "optionalNullableRecord",
+      type: () => ({ Hobby }),
+      value: null,
+      options: { optional: true, nullable: true },
+    },
+    {
+      key: "optionalArrayOfRecords",
+      type: () => [{ Hobby }],
+      value: undefined,
+      options: { optional: true },
+    },
+    {
+      key: "optionalNullableArrayOfRecords",
+      type: () => [{ Hobby }],
+      value: null,
+      options: { optional: true, nullable: true },
+    },
   ];
   const keysWithProducer = ["address", "hobbies"];
 
@@ -82,6 +116,8 @@ describe("getTargetTypes", () => {
       address: "Primitive<Address>",
       isSingle: "Primitive<Boolean>",
       hobbies: "Array<Hobby>",
+      recordOfHobbies: "Primitive<Record<Hobby>>",
+      arrayOfRecordsOfHobbies: "Array<Record<Hobby>>",
       nullField: "Primitive<String>",
       nullList: "Array<String>",
       nullableField: "NullablePrimitive<String>",
@@ -90,6 +126,10 @@ describe("getTargetTypes", () => {
       optionalFieldList: "Array<String>",
       optionalNullableField: "NullablePrimitive<String>",
       optionalNullableFieldList: "NullableArray<String>",
+      optionalRecord: "Primitive<Record<Hobby>>",
+      optionalNullableRecord: "NullablePrimitive<Record<Hobby>>",
+      optionalArrayOfRecords: "Array<Record<Hobby>>",
+      optionalNullableArrayOfRecords: "NullableArray<Record<Hobby>>",
     });
   });
 
@@ -100,12 +140,18 @@ describe("getTargetTypes", () => {
       isSingle: "Primitive<Boolean>",
       nullField: "Primitive<String>",
       nullList: "Array<String>",
+      recordOfHobbies: "Primitive<Record<Hobby>>",
+      arrayOfRecordsOfHobbies: "Array<Record<Hobby>>",
       nullableField: "NullablePrimitive<String>",
       nullableList: "NullableArray<String>",
       optionalField: "Primitive<String>",
       optionalFieldList: "Array<String>",
       optionalNullableField: "NullablePrimitive<String>",
       optionalNullableFieldList: "NullableArray<String>",
+      optionalRecord: "Primitive<Record<Hobby>>",
+      optionalNullableRecord: "NullablePrimitive<Record<Hobby>>",
+      optionalArrayOfRecords: "Array<Record<Hobby>>",
+      optionalNullableArrayOfRecords: "NullableArray<Record<Hobby>>",
     });
   });
 });

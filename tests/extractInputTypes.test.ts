@@ -1,5 +1,9 @@
 import { extractInputTypes } from "../src/core";
 
+class MockEntity {
+  static of() {}
+}
+
 describe("extractInputTypes", () => {
   it('should return "Null" if value is null', () => {
     const data = extractInputTypes([
@@ -60,7 +64,7 @@ describe("extractInputTypes", () => {
     expect(data).toEqual({ a: "Array<Null>" });
   });
 
-  it('should return "Array<Null>" if value is Array, contains null Field is nullable and optional', () => {
+  it('should return "Array<Null>" if value is Array, contains null Field, is nullable and optional', () => {
     const data = extractInputTypes([
       {
         key: "a",
@@ -161,6 +165,34 @@ describe("extractInputTypes", () => {
 
     expect(data).toEqual({
       a: "Primitive<undefined>",
+    });
+  });
+
+  it("should return Primitive<Record> if value is a Record<string, Primitive>", () => {
+    const data = extractInputTypes([
+      {
+        key: "a",
+        type: () => ({ MockEntity }),
+        value: { b: {} },
+      },
+    ]);
+
+    expect(data).toEqual({
+      a: "Primitive<Object>",
+    });
+  });
+
+  it("should return Array<Record> if value is a Record<string, Primitive>[]", () => {
+    const data = extractInputTypes([
+      {
+        key: "a",
+        type: () => [{ MockEntity }],
+        value: [{ b: {} }],
+      },
+    ]);
+
+    expect(data).toEqual({
+      a: "Array<Object>",
     });
   });
 });

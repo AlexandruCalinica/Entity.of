@@ -36,7 +36,41 @@ class User {
   static of = Entity.of<User>();
 }
 
-User.of({ profile: [null] });
+@Entity
+class WithRecord {
+  @Of(() => ({ Profile }))
+  record: Record<string, Profile> = {};
 
-const s = JSON.stringify(getStore().store, null, 2);
-console.log("Store -->", s);
+  @Of(() => [{ Profile }], { nullable: true })
+  recordArray: Record<string, Profile>[] = [];
+
+  static of = Entity.of<WithRecord>();
+}
+
+const x = WithRecord.of({
+  record: {
+    a: {
+      address: "123",
+      age: 123,
+    },
+  },
+  recordArray: [
+    {
+      a: {
+        address: "123",
+        age: 123,
+      },
+    },
+    {
+      1: {
+        address: "123",
+        age: 12,
+      },
+    },
+  ],
+});
+// const y = WithRecord.of({});
+// console.log(y);
+
+const s = getStore();
+console.log(JSON.stringify(s.store, null, 2));

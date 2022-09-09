@@ -45,6 +45,8 @@ describe("getProducerFields", () => {
     { key: "baz", type: () => [String] }, // Primitive
     { key: "bar", type: () => MockFoo }, // Producer
     { key: "bax", type: () => [MockBaz] }, // Producer
+    { key: "bah", type: () => ({ MockBaz }) }, // Producer
+    { key: "bap", type: () => [{ MockBaz }] }, // Producer
   ];
 
   // act
@@ -52,9 +54,11 @@ describe("getProducerFields", () => {
 
   // assert
   it("Should return only Producer fields", () => {
-    expect(output).toHaveLength(2);
+    expect(output).toHaveLength(4);
     expect(output).toContainObject({ key: "bar" });
     expect(output).toContainObject({ key: "bax" });
+    expect(output).toContainObject({ key: "bah" });
+    expect(output).toContainObject({ key: "bap" });
   });
 
   it("Should not return Primitive fields", () => {
@@ -137,6 +141,62 @@ describe("getProducerFields", () => {
     const _fields: FieldProps[] = [
       ...fields,
       { key: "foo", type: () => [Array as any] },
+    ];
+
+    // act
+    const getOutput = () => getProducerFields(_fields, producerName);
+
+    // assert
+    expect(getOutput).toThrow();
+  });
+
+  it("Should throw if any Field.type returns a {Object}", () => {
+    // given
+    const _fields: FieldProps[] = [
+      ...fields,
+      { key: "foo", type: () => ({ Object } as any) },
+    ];
+
+    // act
+    const getOutput = () => getProducerFields(_fields, producerName);
+
+    // assert
+    expect(getOutput).toThrow();
+  });
+
+  it("Should throw if any Field.type returns a {Array}", () => {
+    // given
+    const _fields: FieldProps[] = [
+      ...fields,
+      { key: "foo", type: () => ({ Array } as any) },
+    ];
+
+    // act
+    const getOutput = () => getProducerFields(_fields, producerName);
+
+    // assert
+    expect(getOutput).toThrow();
+  });
+
+  it("Should throw if any Field.type return [{Object}]", () => {
+    // given
+    const _fields: FieldProps[] = [
+      ...fields,
+      { key: "foo", type: () => [{ Object } as any] },
+    ];
+
+    // act
+    const getOutput = () => getProducerFields(_fields, producerName);
+
+    // assert
+    expect(getOutput).toThrow();
+  });
+
+  it("Should throw if any Field.type return [{Array}]", () => {
+    // given
+    const _fields: FieldProps[] = [
+      ...fields,
+      { key: "foo", type: () => [{ Array } as any] },
     ];
 
     // act
