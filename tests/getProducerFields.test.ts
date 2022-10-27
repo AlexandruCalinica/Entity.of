@@ -47,6 +47,16 @@ describe("getProducerFields", () => {
     { key: "bax", type: () => [MockBaz] }, // Producer
     { key: "bah", type: () => ({ MockBaz }) }, // Producer
     { key: "bap", type: () => [{ MockBaz }] }, // Producer
+    {
+      key: "bac",
+      type: () => ({ MockBaz, MockFoo }),
+      options: { isCustom: true },
+    }, // Producer
+    {
+      key: "bal",
+      type: () => ({ MockBaz, MockFoo, String, Number, Boolean }),
+      options: { isCustom: true },
+    }, // Producer
   ];
 
   // act
@@ -54,11 +64,12 @@ describe("getProducerFields", () => {
 
   // assert
   it("Should return only Producer fields", () => {
-    expect(output).toHaveLength(4);
+    expect(output).toHaveLength(5);
     expect(output).toContainObject({ key: "bar" });
     expect(output).toContainObject({ key: "bax" });
     expect(output).toContainObject({ key: "bah" });
     expect(output).toContainObject({ key: "bap" });
+    expect(output).toContainObject({ key: "bac" });
   });
 
   it("Should not return Primitive fields", () => {
@@ -66,6 +77,7 @@ describe("getProducerFields", () => {
     expect(output).not.toContainObject({ key: "far" });
     expect(output).not.toContainObject({ key: "faz" });
     expect(output).not.toContainObject({ key: "foo" });
+    expect(output).not.toContainObject({ key: "bal" });
   });
 
   it("Should not alter any Field properties", () => {

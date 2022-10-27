@@ -33,6 +33,59 @@ describe("getTargetTypes", () => {
       value: { a: { id: 1, description: "Football" } },
     },
     {
+      key: "customRecord",
+      type: () => ({ String, Boolean, Number, Address } as any),
+      value: {
+        a: "a",
+        b: true,
+        c: 1,
+        d: { street: "Industrial Drive", nr: "26", zip: 123456 },
+      },
+      options: {
+        isCustom: true,
+        producerFields: {
+          d: "Address",
+        },
+      },
+    },
+    {
+      key: "nullableCustomRecord",
+      type: () => ({ String, Boolean, Number, Address } as any),
+      value: null,
+      options: {
+        nullable: true,
+        isCustom: true,
+        producerFields: {
+          d: "Address",
+        },
+      },
+    },
+    {
+      key: "optionalCustomRecord",
+      type: () => ({ String, Boolean, Number, Address } as any),
+      value: undefined,
+      options: {
+        optional: true,
+        isCustom: true,
+        producerFields: {
+          d: "Address",
+        },
+      },
+    },
+    {
+      key: "optionalNullableCustomRecord",
+      type: () => ({ String, Boolean, Number, Address } as any),
+      value: null,
+      options: {
+        nullable: true,
+        optional: true,
+        isCustom: true,
+        producerFields: {
+          d: "Address",
+        },
+      },
+    },
+    {
       key: "arrayOfRecordsOfHobbies",
       type: () => [{ Hobby }],
       value: [{ a: { id: 1, description: "Football" } }],
@@ -117,6 +170,12 @@ describe("getTargetTypes", () => {
       isSingle: "Primitive<Boolean>",
       hobbies: "Array<Hobby>",
       recordOfHobbies: "Primitive<Record<Hobby>>",
+      customRecord: "Primitive<Record<Address|Boolean|Number|String>>",
+      nullableCustomRecord:
+        "NullablePrimitive<Record<Address|Boolean|Number|String>>",
+      optionalCustomRecord: "Primitive<Record<Address|Boolean|Number|String>>",
+      optionalNullableCustomRecord:
+        "NullablePrimitive<Record<Address|Boolean|Number|String>>",
       arrayOfRecordsOfHobbies: "Array<Record<Hobby>>",
       nullField: "Primitive<String>",
       nullList: "Array<String>",
@@ -141,6 +200,12 @@ describe("getTargetTypes", () => {
       nullField: "Primitive<String>",
       nullList: "Array<String>",
       recordOfHobbies: "Primitive<Record<Hobby>>",
+      customRecord: "Primitive<Record<Address|Boolean|Number|String>>",
+      nullableCustomRecord:
+        "NullablePrimitive<Record<Address|Boolean|Number|String>>",
+      optionalCustomRecord: "Primitive<Record<Address|Boolean|Number|String>>",
+      optionalNullableCustomRecord:
+        "NullablePrimitive<Record<Address|Boolean|Number|String>>",
       arrayOfRecordsOfHobbies: "Array<Record<Hobby>>",
       nullableField: "NullablePrimitive<String>",
       nullableList: "NullableArray<String>",

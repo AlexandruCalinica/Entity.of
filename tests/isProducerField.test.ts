@@ -130,42 +130,6 @@ describe("isProducerField", () => {
     expect(checkIsProducer).toThrow();
   });
 
-  it("Should throw if Field.type: () => ({ Number })", () => {
-    // given
-    const withNumber: FieldProps = {
-      key: "foo",
-      type: () => ({ Number } as any),
-    };
-    const checkIsProducer = () => isProducerField(withNumber, producerName);
-
-    // act and assert
-    expect(checkIsProducer).toThrow();
-  });
-
-  it("Should throw if Field.type: () => ({ String })", () => {
-    // given
-    const withString: FieldProps = {
-      key: "foo",
-      type: () => ({ String } as any),
-    };
-    const checkIsProducer = () => isProducerField(withString, producerName);
-
-    // act and assert
-    expect(checkIsProducer).toThrow();
-  });
-
-  it("Should throw if Field.type: () => ({ Boolean })", () => {
-    // given
-    const withBoolean: FieldProps = {
-      key: "foo",
-      type: () => ({ Boolean } as any),
-    };
-    const checkIsProducer = () => isProducerField(withBoolean, producerName);
-
-    // act and assert
-    expect(checkIsProducer).toThrow();
-  });
-
   it("Should throw if Field.type: () => [{ Object }]", () => {
     // given
     const withArrayOfObjects: FieldProps = {

@@ -39,6 +39,7 @@
   - [createEntityStore(options?: StoreOptions): void;](#createentitystoreoptions-storeoptions-void)
   - [@Entity](#entity)
   - [@Of(type?: () => any, options?: FieldOptions)](#oftype---any-options-fieldoptions)
+    - [Advanced Custom Field Types](#advanced-custom-field-types)
   - [@Producer](#producer)
   - [mapObjectToEntity(data: Partial of T, Entity: Ctr of T): T](#mapobjecttoentitydata-partial-of-t-entity-ctr-of-t-t)
 - [Trouble Shooting](#trouble-shooting)
@@ -173,6 +174,15 @@ First passed argument must be a function that returns the desired type in the fo
 () => User
 () => [User] // describes an array of users
 
+// advanced custom types
+
+// below line describes an object with properties of type: string|number|boolean|User
+() => ({ String, Number, Boolean, User }) 
+// below line describes an object with properties of type: User|Profile|Address
+() => ({ User, Profile, Address })
+// below line describes an array of objects containing properties of type: User
+() => [{ User }] // *this type only supports one entity for the moment
+
 // NOT OK
 () => null
 () => undefined
@@ -182,9 +192,11 @@ First passed argument must be a function that returns the desired type in the fo
 () => {}
 () => Object
 () => []
+() => [{ User, String, Boolean }]
 
 // Not yet implemented but considered
 () => [String, Number, Boolean, User] // describes an array containing any of the enumerated types
+() => [{ String, Boolean, Number, User }] // describes an array of objects containing any of the enumerated types
 ```
 
 The `@Of` decorator can also describe if the field is **nullable** or **optional**.
@@ -208,6 +220,97 @@ class User {
 }
 
 User.of({ name: [null, 1, 2] }) // typing is ok now.
+```
+
+### Advanced Custom Field Types
+Although Entity.of is intended to model entities that represent domain models (for ex: database schemas), there might be cases where a field must describe a much more advanced, dynamic or generic data structure. Think of objects where we do not know in advance the name and types of the properties.
+
+Luckily, the `@Of` decorator supports those kinds of usecases.
+```ts
+@Entity
+class DynamicEntity {
+  @Of(() => ({ String, Boolean, Number }), { isCustom: true })
+  dynamicField: Record<string, string | boolean | number> = {}
+
+  static of = Entity.of<DynamicEntity>();
+}
+
+DynamicEntity.of({
+  dynamicField: {
+    foo: 'hello',
+    baz: 123,
+    bar: true
+  }
+})
+```
+This approach also supports other Entities in combination with Primitive constructors:
+```ts
+@Entity
+class DynamicEntity {
+  @Of(() => ({ String, Boolean, Number, User }), { 
+    isCustom: true, 
+    producerFields: {
+      user: 'User'
+    } 
+  })
+  dynamicField: Record<string, string | boolean | number | User> = {}
+
+  static of = Entity.of<DynamicEntity>();
+}
+
+DynamicEntity.of({
+  dynamicField: {
+    foo: 'hello',
+    baz: 123,
+    bar: true,
+    user: {
+      ...
+    }
+  }
+})
+```
+A dynamic field can also support objects with unknown properties all of a specific type
+```ts
+@Entity
+class DynamicEntity {
+  @Of(() => ({ User }))
+  dynamicField: Record<string, User> = {}
+
+  static of = Entity.of<DynamicEntity>();
+}
+
+DynamicEntity.of({
+  dynamicField: {
+    foo: { /* User props */ }
+    bar: { /* User props */ }
+    baz: { /* User props */ }
+  }
+})
+```
+And finally, a dynamic field can represent an array of objects with unknown keys but all values of a specific type:
+```ts
+@Entity
+class DynamicEntity {
+  @Of(() => [{ User }])
+  dynamicField: Record<string, User>[] = []
+
+  static of = Entity.of<DynamicEntity>();
+}
+
+DynamicEntity.of({
+  dynamicField: [
+    {
+      foo: { /* User props */ }
+      bar: { /* User props */ }
+      baz: { /* User props */ }
+    },
+    {
+      bac: { /* User props */ }
+      fiz: { /* User props */ }
+      bad: { /* User props */ }
+    },
+  ]
+})
 ```
 
 ## @Producer

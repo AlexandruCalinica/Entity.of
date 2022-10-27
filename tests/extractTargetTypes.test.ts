@@ -208,4 +208,72 @@ describe("extractTargetTypes", () => {
 
     expect(data).toEqual({ a: "Primitive<Record<MockEntity>>" });
   });
+
+  it("should return Primitive<Record<Type>> if type is a Record containing one or many Primitives/Entities", () => {
+    const data = extractTargetTypes([
+      {
+        key: "a",
+        type: () => ({ MockEntity }),
+        value: { b: {} },
+        options: {
+          isCustom: true,
+          producerFields: {
+            b: "MockEntity",
+          },
+        },
+      },
+    ]);
+    const data2 = extractTargetTypes([
+      {
+        key: "a",
+        type: () => ({ String, Number, Boolean, MockEntity } as any),
+        value: { a: "hello", b: {}, c: 1, d: true },
+        options: {
+          isCustom: true,
+          producerFields: {
+            b: "MockEntity",
+          },
+        },
+      },
+    ]);
+    expect(data).toEqual({ a: "Primitive<Record<MockEntity>>" });
+    expect(data2).toEqual({
+      a: "Primitive<Record<Boolean|MockEntity|Number|String>>",
+    });
+  });
+
+  it("should return NullablePrimitive<Record<Type>> if type is a Record containing one or many Primitives/Entities and nullable is true", () => {
+    const data = extractTargetTypes([
+      {
+        key: "a",
+        type: () => ({ MockEntity }),
+        value: { b: {} },
+        options: {
+          isCustom: true,
+          nullable: true,
+          producerFields: {
+            b: "MockEntity",
+          },
+        },
+      },
+    ]);
+    const data2 = extractTargetTypes([
+      {
+        key: "a",
+        type: () => ({ String, Number, Boolean, MockEntity } as any),
+        value: { a: "hello", b: {}, c: 1, d: true },
+        options: {
+          isCustom: true,
+          nullable: true,
+          producerFields: {
+            b: "MockEntity",
+          },
+        },
+      },
+    ]);
+    expect(data).toEqual({ a: "NullablePrimitive<Record<MockEntity>>" });
+    expect(data2).toEqual({
+      a: "NullablePrimitive<Record<Boolean|MockEntity|Number|String>>",
+    });
+  });
 });

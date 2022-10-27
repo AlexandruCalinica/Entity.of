@@ -17,6 +17,10 @@ export type StoreOptions = {
 export type FieldOptions = {
   nullable?: boolean;
   optional?: boolean;
+  isCustom?: boolean;
+  producerFields?: {
+    [key: string]: string;
+  };
 };
 
 export type FieldProps = {
@@ -158,108 +162,92 @@ export function isProducerField(
   { key, type }: FieldProps,
   producerName: string
 ) {
+  const t = type();
+
   // Check first () => [Producer] types
-  if (Array.isArray(type())) {
-    if ((type() as any[])[0] === Object) {
+  if (Array.isArray(t)) {
+    if ((t as any[])[0] === Object) {
       throw new Error(
         `${key} 'type' function should not return an array containing a primitive Object constructor`
       );
     }
 
-    if ((type() as any[])[0] === Array) {
+    if ((t as any[])[0] === Array) {
       throw new Error(
         `${key} 'type' function should not return an array containing a primitive Array constructor`
       );
     }
 
-    if (
-      typeof (type() as any[])[0] === "object" &&
-      (type() as any[])[0] !== null
-    ) {
-      if (Object.values((type() as any[])[0])[0] === Object) {
-        throw new Error(
-          `${key} 'type' function should not return an array of records containing primitive Object constructors as values`
-        );
-      }
-      if (Object.values((type() as any[])[0])[0] === Array) {
-        throw new Error(
-          `${key} 'type' function should not return an array of records containing primitive Array constructors as values`
-        );
-      }
-      if (Object.values((type() as any[])[0])[0] === Number) {
-        throw new Error(
-          `${key} 'type' function should not return an array of records containing primitive Number constructors as values`
-        );
-      }
-      if (Object.values((type() as any[])[0])[0] === String) {
-        throw new Error(
-          `${key} 'type' function should not return an array of records containing primitive String constructors as values`
-        );
-      }
-      if (Object.values((type() as any[])[0])[0] === Boolean) {
-        throw new Error(
-          `${key} 'type' function should not return an array of records containing primitive Boolean constructors as values`
-        );
-      }
+    if (typeof (t as any[])[0] === "object" && (t as any[])[0] !== null) {
+      const target = Object.values(t[0])[0];
 
-      return Object.values(
-        (type() as Record<string, any>[])[0]
-      )[0].hasOwnProperty(producerName);
+      switch (target) {
+        case Object:
+          throw new Error(
+            `${key} 'type' function should not return an array of records containing primitive Object constructors as values`
+          );
+        case Array:
+          throw new Error(
+            `${key} 'type' function should not return an array of records containing primitive Array constructors as values`
+          );
+        case Number:
+          throw new Error(
+            `${key} 'type' function should not return an array of records containing primitive Number constructors as values`
+          );
+        case String:
+          throw new Error(
+            `${key} 'type' function should not return an array of records containing primitive String constructors as values`
+          );
+        case Boolean:
+          throw new Error(
+            `${key} 'type' function should not return an array of records containing primitive Boolean constructors as values`
+          );
+        default:
+          return target.hasOwnProperty(producerName);
+      }
     }
 
-    return (type() as any[])[0].hasOwnProperty(producerName);
+    return t[0].hasOwnProperty(producerName);
   }
 
-  if (typeof type() === "object" && !Array.isArray(type()) && type() !== null) {
-    if (Object.values(type())[0] === Object) {
-      throw new Error(
-        `${key} 'type' function should not return a record containing a primitive Object constructor as value`
-      );
-    }
-    if (Object.values(type())[0] === Array) {
-      throw new Error(
-        `${key} 'type' function should not return a record containing a primitive Array constructor as value`
-      );
-    }
-    if (Object.values(type())[0] === Number) {
-      throw new Error(
-        `${key} 'type' function should not return a record containing a primitive Number constructor as value`
-      );
-    }
-    if (Object.values(type())[0] === String) {
-      throw new Error(
-        `${key} 'type' function should not return a record containing a primitive String constructor as value`
-      );
-    }
-    if (Object.values(type())[0] === Boolean) {
-      throw new Error(
-        `${key} 'type' function should not return a record containing a primitive Boolean constructor as value`
-      );
-    }
+  if (typeof t === "object" && !Array.isArray(t) && t !== null) {
+    const target = Object.values(t) as any[];
 
-    return Object.values(type())[0].hasOwnProperty(producerName);
+    switch (target[0]) {
+      case Object:
+        throw new Error(
+          `${key} 'type' function should not return a record containing a primitive Object constructor as value`
+        );
+      case Array:
+        throw new Error(
+          `${key} 'type' function should not return a record containing a primitive Array constructor as value`
+        );
+      default:
+        return (
+          target.filter((v) => v.hasOwnProperty(producerName)).length ===
+          target.length
+        );
+    }
   }
 
-  if (type() === Array) {
-    throw new Error(
-      `${key} 'type' function should not return a primitive Array constructor`
-    );
-  }
-
-  if ((type() as unknown as ObjectConstructor) === Object) {
-    throw new Error(
-      `${key} 'type' function should not return a primitive Object constructor`
-    );
-  }
-
-  if (type() === String || type() === Number || type() === Boolean) {
-    return false;
-  } else {
-    if (!(type() as any).hasOwnProperty(producerName)) {
-      throw new Error("Missing producer method - of");
-    }
-
-    return true;
+  switch (t as any) {
+    case Array:
+      throw new Error(
+        `${key} 'type' function should not return a primitive Array constructor`
+      );
+    case Object:
+      throw new Error(
+        `${key} 'type' function should not return a primitive Object constructor`
+      );
+    case Number:
+    case String:
+    case Boolean:
+      return false;
+    default:
+      if (!t.hasOwnProperty(producerName)) {
+        throw new Error("Missing producer method - of");
+      }
+      return true;
   }
 }
 
@@ -320,8 +308,25 @@ export function produceEntries(
         ...acc,
         [key]: Object.entries(initialData[key] || []).reduce((acc, curr) => {
           const [k, v] = curr;
-          const entity = Object.values(type() as Record<string, Ctr<any>>)[0];
-          return { ...acc, [k]: entity.of(v as any) };
+          const entities = Object.values(
+            type() as Record<string, Ctr<any>>
+          ).filter((v) => v.hasOwnProperty("of"));
+
+          if (options && options?.producerFields) {
+            if (options.producerFields[k]) {
+              const entity = entities.find(
+                (v) => v.name === options?.producerFields?.[k]
+              ) as Ctr<any>;
+
+              if (entity) {
+                return { ...acc, [k]: entity.of(v as any) };
+              }
+            }
+            return { ...acc, [k]: v };
+          }
+
+          if (!entities[0]) return { ...acc, [k]: v };
+          return { ...acc, [k]: entities[0].of(v as any) };
         }, {}),
       };
     }
@@ -355,11 +360,30 @@ export function extractInputTypes(fields: (FieldProps & { value: any })[]) {
       return out;
     }
 
-    const typeName = Array.isArray(value)
+    let typeName = Array.isArray(value)
       ? value.length > 0
         ? value[0]?.constructor?.name
         : "Empty"
       : value?.constructor?.name;
+
+    if (
+      options?.isCustom &&
+      typeof value === "object" &&
+      !Array.isArray(value) &&
+      Object.values(value).length
+    ) {
+      const values = Object.entries(value)
+        .map(([k, v]) => {
+          if (options?.producerFields?.[k]) {
+            return options.producerFields[k];
+          }
+          return (v as any).constructor.name;
+        })
+        .sort();
+
+      const uniqueValues = [...new Set(values)];
+      typeName = `Record<${uniqueValues.join("|")}>`;
+    }
 
     if (Array.isArray(value)) {
       out[key] = `Array<${typeName}>`;
@@ -367,7 +391,6 @@ export function extractInputTypes(fields: (FieldProps & { value: any })[]) {
     }
 
     out[key] = `Primitive<${typeName}>`;
-
     return out;
   }, {} as Record<string, string>);
 }
@@ -393,7 +416,10 @@ export function extractTargetTypes(fields: (FieldProps & { value: any })[]) {
         !Array.isArray(type()) &&
         type() !== null
       ) {
-        typeName = Object.values(type() as MixedCtr<any>)[0].name;
+        typeName = Object.values(type() as MixedCtr<any>)
+          .map((v) => v.name)
+          .sort()
+          .join("|");
       } else {
         typeName = (type() as MixedCtr<any>).name as string;
       }
@@ -507,6 +533,27 @@ export function trackWrongValues(
       }
     }
 
+    if (
+      targetType.startsWith("NullablePrimitive<Record") &&
+      targetType.includes("|")
+    ) {
+      const targetTypes = targetType
+        .replace("NullablePrimitive<Record<", "")
+        .replace(">>", "")
+        .split("|");
+
+      const inputTypes = inputType
+        .replace("Primitive<Record<", "")
+        .replace(">>", "")
+        .split("|") as any[];
+
+      const isSubset = inputTypes.every((t) => targetTypes.includes(t));
+
+      if (isSubset) {
+        return;
+      }
+    }
+
     if (targetType.startsWith("NullablePrimitive")) {
       if (inputType === "Null" || inputType === "Array<Null>") {
         return;
@@ -519,6 +566,24 @@ export function trackWrongValues(
 
     if (targetType.startsWith("Array") && inputType.includes("Empty")) {
       return;
+    }
+
+    if (targetType.startsWith("Primitive<Record") && targetType.includes("|")) {
+      const targetTypes = targetType
+        .replace("Primitive<Record<", "")
+        .replace(">>", "")
+        .split("|");
+
+      const inputTypes = inputType
+        .replace("Primitive<Record<", "")
+        .replace(">>", "")
+        .split("|") as any[];
+
+      const isSubset = inputTypes.every((t) => targetTypes.includes(t));
+
+      if (isSubset) {
+        return;
+      }
     }
 
     if (targetType !== inputType) {
