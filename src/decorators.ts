@@ -1,40 +1,9 @@
-import { createProducer, FieldOptions } from "./core";
 import { t, TFunction } from "./typer";
 import { parse } from "./parser";
 import { T } from "./types";
 import { Log } from "./logger";
 
-export function Of(type?: () => any, options?: FieldOptions) {
-  return function (target: any, key: string) {
-    const owner = target.constructor;
-
-    if (!owner.fields) {
-      owner.fields = [];
-    }
-
-    owner.fields.push({ key, type, options });
-  };
-}
-
-export function Producer(target: any, key: string) {
-  const initial = target[key];
-
-  target[key] = createProducer(target, key, initial);
-}
-
-export function Entity<T extends { new (...args: any[]): {} }>(constructor: T) {
-  Object.assign(constructor, { of: createProducer(constructor as any, "of") });
-
-  return constructor;
-}
-
-Entity.of = function <T>(): (data: Partial<T>) => T {
-  return function (data) {
-    return data as T;
-  };
-};
-
-export function type(type: (t: TFunction) => T) {
+export function Of(type: (t: TFunction) => T) {
   return function (target: any, key: string) {
     const owner = target.constructor;
 
@@ -47,7 +16,10 @@ export function type(type: (t: TFunction) => T) {
   };
 }
 
-export function entity() {
+export interface Entity<T> {
+  of(data: Partial<T>): T;
+}
+export function Entity() {
   return function <C extends { new (...args: any[]): {} }>(constr: C) {
     function of(values: C): C {
       for (const key in values) {
@@ -82,7 +54,7 @@ export function entity() {
   };
 }
 
-entity.of = function <T>(): (data: Partial<T>) => T {
+Entity.of = function <T>(): (data: Partial<T>) => T {
   return function (data) {
     return data as T;
   };

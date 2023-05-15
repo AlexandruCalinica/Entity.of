@@ -1,10 +1,10 @@
-import { entity, type } from "../../src/decorators";
+import { Entity, Of } from "../src/decorators";
 
 describe("custom types", () => {
   // given
-  @entity()
+  @Entity()
   class Test {
-    @type((t) =>
+    @Of((t) =>
       t.custom((v) => {
         if (typeof v === "boolean") return "boolean";
         if (typeof v === "number") return "number";
@@ -14,7 +14,7 @@ describe("custom types", () => {
     )
     a: unknown = "";
 
-    static of = entity.of<Test>();
+    static of = Entity.of<Test>();
   }
 
   // when

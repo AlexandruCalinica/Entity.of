@@ -1,62 +1,62 @@
-import { entity, type } from "../../src/decorators";
-import { Store } from "../../src/store";
+import { Entity, Of } from "../src/decorators";
+import { Store } from "../src/store";
 
 describe("record types", () => {
   // given
-  @entity()
+  @Entity()
   class Nested {
-    @type((t) => t(String))
+    @Of((t) => t(String))
     name: string = "";
 
-    @type((t) => t(String))
+    @Of((t) => t(String))
     surname: string = "";
 
-    static of = entity.of<Nested>();
+    static of = Entity.of<Nested>();
   }
 
-  @entity()
+  @Entity()
   class Nested2 {
-    @type((t) => t(String))
+    @Of((t) => t(String))
     city: string = "";
 
-    @type((t) => t(String))
+    @Of((t) => t(String))
     street: string = "";
 
-    static of = entity.of<Nested2>();
+    static of = Entity.of<Nested2>();
   }
 
-  @entity()
+  @Entity()
   class Test {
-    @type((t) => t.record(String, String))
+    @Of((t) => t.record(String, String))
     a: Record<string, string> = {};
 
-    @type((t) => t.record(String, Number))
+    @Of((t) => t.record(String, Number))
     b: Record<string, number> = {};
 
-    @type((t) => t.record(String, Boolean))
+    @Of((t) => t.record(String, Boolean))
     c: Record<string, boolean> = {};
 
-    @type((t) => t.record(String, t.record(String, String)))
+    @Of((t) => t.record(String, t.record(String, String)))
     d: Record<string, Record<string, string>> = {};
 
-    @type((t) => t.record(String, t.array(String)))
+    @Of((t) => t.record(String, t.array(String)))
     e: Record<string, string[]> = {};
 
-    @type((t) => t.record(String, Nested))
+    @Of((t) => t.record(String, Nested))
     f: Record<string, Nested> = {};
 
-    @type((t) => t.record(String, t.union(String, Number, Boolean)))
+    @Of((t) => t.record(String, t.union(String, Number, Boolean)))
     g: Record<string, string | number | boolean> = {};
 
-    @type((t) => t.record(String, t.union(Nested, Nested2)))
+    @Of((t) => t.record(String, t.union(Nested, Nested2)))
     h: Record<string, Nested | Nested2> = {};
 
-    @type((t) =>
+    @Of((t) =>
       t.record(String, t.union(Nested, Nested2, t.record(String, String)))
     )
     i: Record<string, Nested | Nested2 | Record<string, string>> = {};
 
-    @type((t) =>
+    @Of((t) =>
       t.record(
         String,
         t.record(String, t.union(Nested, Nested2, t.record(String, String)))
@@ -67,7 +67,7 @@ describe("record types", () => {
       Record<string, Nested | Nested2 | Record<string, string>>
     > = {};
 
-    @type((t) =>
+    @Of((t) =>
       t.record(
         String,
         t.array(t.union(Nested, Nested2, t.record(String, String)))
@@ -75,7 +75,7 @@ describe("record types", () => {
     )
     k: Record<string, (Nested | Nested2 | Record<string, string>)[]> = {};
 
-    @type((t) =>
+    @Of((t) =>
       t.record(
         String,
         t.record(
@@ -89,10 +89,10 @@ describe("record types", () => {
       Record<string, (Nested | Nested2 | Record<string, string>)[]>
     > = {};
 
-    @type((t) => t.record(String, String).optional().nullable())
+    @Of((t) => t.record(String, String).optional().nullable())
     m?: Record<string, string> | null;
 
-    static of = entity.of<Test>();
+    static of = Entity.of<Test>();
   }
 
   // when

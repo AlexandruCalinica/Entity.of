@@ -1,45 +1,45 @@
-import { entity, type } from "../../src/decorators";
-import { Store } from "../../src/store";
+import { Entity, Of } from "../src/decorators";
+import { Store } from "../src/store";
 
 describe("union types", () => {
   // given
-  @entity()
+  @Entity()
   class Nested {
-    @type((t) => t(String))
+    @Of((t) => t(String))
     name: string = "";
 
-    @type((t) => t(String))
+    @Of((t) => t(String))
     surname: string = "";
 
-    static of = entity.of<Nested>();
+    static of = Entity.of<Nested>();
   }
 
-  @entity()
+  @Entity()
   class Nested2 {
-    @type((t) => t(String))
+    @Of((t) => t(String))
     city: string = "";
 
-    @type((t) => t(String))
+    @Of((t) => t(String))
     street: string = "";
 
-    static of = entity.of<Nested2>();
+    static of = Entity.of<Nested2>();
   }
 
-  @entity()
+  @Entity()
   class Test {
-    @type((t) => t.union(String, Number, Boolean))
+    @Of((t) => t.union(String, Number, Boolean))
     a: string | number | boolean = "";
 
-    @type((t) => t.union(Nested, Nested2))
+    @Of((t) => t.union(Nested, Nested2))
     b: Nested | Nested2 = Nested.of({});
 
-    @type((t) => t.union(Nested, t.record(String, String)))
+    @Of((t) => t.union(Nested, t.record(String, String)))
     c: Nested | Record<string, string> = {};
 
-    @type((t) => t.union(Nested, Nested2).optional().nullable())
+    @Of((t) => t.union(Nested, Nested2).optional().nullable())
     d?: Nested | Nested2 | null;
 
-    static of = entity.of<Test>();
+    static of = Entity.of<Test>();
   }
 
   // when

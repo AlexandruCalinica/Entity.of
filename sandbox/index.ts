@@ -1,41 +1,51 @@
-import { type, entity } from "../src";
+import { Entity, Of } from "../src";
 
 console.clear();
 
-@entity()
+@Entity()
 class Profile {
-  @type((t) => t(String))
+  @Of((t) => t(String))
   name: string = "";
 
-  @type((t) => t(String))
+  @Of((t) => t(String))
   surname: string = "";
 
-  static of = entity.of<Profile>();
+  static of = Entity.of<Profile>();
 }
 
-@entity()
+@Entity()
 class Address {
-  @type((t) => t(String))
+  @Of((t) => t(String))
   street: string = "";
 
-  @type((t) => t.union(t.record(String, String), Address))
+  @Of((t) => t.union(t.record(String, String), Address))
   foo: Record<string, string> | Address = {};
 
-  @type((t) => t(String))
+  @Of((t) => t(String))
   city: string = "";
 
-  static of = entity.of<Address>();
+  static of = Entity.of<Address>();
 }
-@entity()
-class User {
-  @type((t) => t.union(Address, t.record(String, String)))
-  a: Address | Record<string, string> = Address.of({});
 
-  static of = entity.of<User>();
+interface Foo<T> {
+  of(data: Partial<T>): T;
+}
+class Foo<T> {
+  static of<T>(data: Partial<T>) {
+    return new Foo();
+  }
+}
+@Entity()
+class User extends Foo<User> {
+  @Of((t) => t.array(t.record(String, Number)))
+  a: Record<string, number>[] = [];
+
+  static of = Entity.of<User>();
 }
 
 const x = User.of({
+  a: [{ a: 1, b: 2 }],
   // @ts-ignore
-  a: { keke: null },
+  k: {},
 });
 console.log(x.a);
