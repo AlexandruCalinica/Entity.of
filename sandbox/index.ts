@@ -46,6 +46,6 @@ class User extends Foo<User> {
 const x = User.of({
   a: [{ a: 1, b: 2 }],
   // @ts-ignore
-  k: {},
+  // k: {},
 });
 console.log(x.a);

@@ -22,6 +22,38 @@ function parseArray(type: T, value: unknown, meta: ParseMeta): any {
         if (typeof val === "object") {
           if (val === null) return "null";
           if (Array.isArray(val)) return "Array";
+
+          const valueKeys = Object.keys(val as any);
+          let valueIsEntity = false;
+          let entityName: string | null = null;
+
+          for (const name in type.entities) {
+            if (["String", "Number", "Boolean"].includes(name)) continue;
+
+            const entity = type.entities[name] as EntityConstructor;
+            const entityTypeFields = Object.keys(entity.types);
+
+            if (entityTypeFields.length !== valueKeys.length) {
+              valueIsEntity = false;
+            }
+
+            for (const key in val as any) {
+              if (!entity.types[key]) {
+                valueIsEntity = false;
+                break;
+              }
+
+              valueIsEntity = true;
+            }
+
+            if (valueIsEntity) {
+              entityName = entity.name;
+              break;
+            }
+          }
+
+          if (valueIsEntity && entityName) return entityName;
+
           return "Record";
         }
         return capitalize(typeof val);
@@ -29,6 +61,13 @@ function parseArray(type: T, value: unknown, meta: ParseMeta): any {
 
       if (targetTypes.includes(valueType)) {
         continue;
+      }
+
+      if (valueType === "Record") {
+        const recordValType = capitalize(typeof Object.values(val)[0]);
+        const ArrayRecordType = `Array<Record<String, ${recordValType}>>`;
+
+        if (type.value === ArrayRecordType) continue;
       }
 
       Log.mismatch({
