@@ -3,49 +3,35 @@ import { Entity, Of } from "../src";
 console.clear();
 
 @Entity()
-class Profile {
+class Bar {
   @Of((t) => t(String))
-  name: string = "";
+  plm: string = "";
 
-  @Of((t) => t(String))
-  surname: string = "";
-
-  static of = Entity.of<Profile>();
+  static of = Entity.of<Bar>();
 }
 
 @Entity()
-class Address {
-  @Of((t) => t(String))
-  street: string = "";
+class Baz {
+  @Of((t) =>
+    t.custom((v) => {
+      return (v as any[]).map((i) => Bar.of({ ...i, test: 1 }));
+    })
+  )
+  bar: Bar[] = [];
 
-  @Of((t) => t.union(t.record(String, String), Address))
-  foo: Record<string, string> | Address = {};
-
-  @Of((t) => t(String))
-  city: string = "";
-
-  static of = Entity.of<Address>();
+  static of = Entity.of<Baz>();
 }
 
-interface Foo<T> {
-  of(data: Partial<T>): T;
-}
-class Foo<T> {
-  static of<T>(data: Partial<T>) {
-    return new Foo();
-  }
-}
 @Entity()
-class User extends Foo<User> {
-  @Of((t) => t.array(t.record(String, Number)))
-  a: Record<string, number>[] = [];
+class Foo {
+  @Of((t) => t.custom((v) => Baz.of(v)))
+  address: Baz = Baz.of({});
 
-  static of = Entity.of<User>();
+  static of = Entity.of<Foo>();
 }
 
-const x = User.of({
-  a: [{ a: 1, b: 2 }],
-  // @ts-ignore
-  // k: {},
+const foo = Foo.of({
+  address: { bar: [{ plm: "salut" }] },
 });
-console.log(x.a);
+
+console.log(foo.address);

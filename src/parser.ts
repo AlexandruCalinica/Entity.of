@@ -422,6 +422,9 @@ function parse(type: T, value: unknown, meta: ParseMeta): any {
             });
             (next as any)[key] = undefined;
           } else {
+            if (Array.isArray((next as any)[key])) {
+              return next;
+            }
             (next as any)[key] = entity.of(
               (next as Record<string, Partial<unknown>>)[key]
             );
